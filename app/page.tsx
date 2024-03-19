@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
   MinusCircle,
@@ -8,6 +8,8 @@ import {
   Settings,
   Clipboard,
   ClipboardCheck,
+  Settings2,
+  X,
 } from "lucide-react";
 
 import { Dialog } from "@headlessui/react";
@@ -31,6 +33,14 @@ const createChatCompletion = (
 ) => {
   const baseURL = localStorage.getItem("baseURL");
   const apiKey = localStorage.getItem("apiKey") || "";
+  const model = localStorage.getItem("model") || "gpt-3.5-turbo";
+  const seed = localStorage.getItem("seed") || "-1";
+  const temperature = localStorage.getItem("temperature") || "0.5";
+  const maxTokens = localStorage.getItem("maxTokens") || "-1";
+  const frequencyPenalty = localStorage.getItem("frequencyPenalty") || "0";
+  const presencePenalty = localStorage.getItem("presencePenalty") || "0";
+  const stop = localStorage.getItem("stop") || "[]";
+  const jsonMode = localStorage.getItem("jsonMode") === "true";
   const openai = new OpenAI({
     baseURL: baseURL === "" ? undefined : baseURL,
     apiKey: apiKey,
@@ -39,14 +49,49 @@ const createChatCompletion = (
   return openai.chat.completions.create(
     {
       messages: messages,
-      model: "gpt-3.5-turbo",
+      model,
+      seed: seed === "" ? undefined : parseInt(seed),
+      temperature: temperature === "" ? undefined : parseFloat(temperature),
+      max_tokens: maxTokens === "" ? undefined : parseInt(maxTokens),
+      stop: stop === "[]" ? undefined : JSON.parse(stop),
+      frequency_penalty:
+        frequencyPenalty === "" ? undefined : parseFloat(frequencyPenalty),
+      presence_penalty:
+        presencePenalty === "" ? undefined : parseFloat(presencePenalty),
       stream: true,
+      response_format: jsonMode ? { type: "json_object" } : undefined,
     },
     {
       signal,
     }
   );
 };
+
+async function copyToClipboard(textToCopy: string) {
+  // Navigator clipboard api needs a secure context (https)
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(textToCopy);
+  } else {
+    // Use the 'out of viewport hidden text area' trick
+    const textArea = document.createElement("textarea");
+    textArea.value = textToCopy;
+
+    // Move textarea out of the viewport so it's not visible
+    textArea.style.position = "absolute";
+    textArea.style.left = "-999999px";
+
+    document.body.prepend(textArea);
+    textArea.select();
+
+    try {
+      document.execCommand("copy");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      textArea.remove();
+    }
+  }
+}
 
 const reactMarkdownComponents = {
   h1: (props: any) => {
@@ -131,6 +176,65 @@ const INITIAL_MESSAGES = [
 ];
 
 const ROLES = ["system", "user", "assistant"];
+
+const useLocalStorage = <T,>({
+  key,
+  initialValue,
+  serialize,
+  deserialize,
+}: {
+  key: string;
+  initialValue: T;
+  serialize: (value: T) => string;
+  deserialize: (value: string) => T;
+}) => {
+  const current = localStorage.getItem(key);
+  const [value, setValue] = useState<T>(
+    current ? deserialize(current) : initialValue
+  );
+  const save = useCallback(() => {
+    localStorage.setItem(key, serialize(value));
+  }, [key, value, serialize]);
+  const reset = useCallback(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+  const reload = useCallback(() => {
+    const item = localStorage.getItem(key);
+    if (item) {
+      setValue(deserialize(item));
+    } else {
+      setValue(initialValue);
+    }
+  }, [key, initialValue, deserialize]);
+  return { value, setValue, save, reset, reload };
+};
+
+const useLocalStorageBoolean = (key: string, initialValue: boolean) => {
+  return useLocalStorage({
+    key,
+    initialValue,
+    serialize: (value) => value.toString(),
+    deserialize: (value) => value === "true",
+  });
+};
+
+const useLocalStorageString = (key: string, initialValue: string) => {
+  return useLocalStorage({
+    key,
+    initialValue,
+    serialize: (value) => value,
+    deserialize: (value) => value,
+  });
+};
+
+const useLocalStorageNumber = (key: string, initialValue: number) => {
+  return useLocalStorage({
+    key,
+    initialValue,
+    serialize: (value) => value.toString(),
+    deserialize: (value) => parseFloat(value),
+  });
+};
 
 const ResizeableTextarea = (props: any) => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -236,7 +340,7 @@ const ChatMessage = ({
             setMessage(newMessage);
           }}
           placeholder={`Enter a ${message.role} message here.`}
-          className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:outline-emerald-600 focus:outline-1 sm:focus:outline-2 outline outline-1 outline-slate-400 rounded-lg resize-none overflow-hidden"
+          className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 ring ring-slate-400 focus:border-none rounded-lg resize-none overflow-hidden"
           onBlur={() => {
             if (editing) {
               setEditing(false);
@@ -250,32 +354,6 @@ const ChatMessage = ({
     </div>
   );
 };
-
-async function copyToClipboard(textToCopy: string) {
-  // Navigator clipboard api needs a secure context (https)
-  if (navigator.clipboard && window.isSecureContext) {
-    await navigator.clipboard.writeText(textToCopy);
-  } else {
-    // Use the 'out of viewport hidden text area' trick
-    const textArea = document.createElement("textarea");
-    textArea.value = textToCopy;
-
-    // Move textarea out of the viewport so it's not visible
-    textArea.style.position = "absolute";
-    textArea.style.left = "-999999px";
-
-    document.body.prepend(textArea);
-    textArea.select();
-
-    try {
-      document.execCommand("copy");
-    } catch (error) {
-      console.error(error);
-    } finally {
-      textArea.remove();
-    }
-  }
-}
 
 const CopyButton = ({ value }: { value: string }) => {
   const [copied, setCopied] = useState(false);
@@ -304,15 +382,385 @@ const CopyButton = ({ value }: { value: string }) => {
   );
 };
 
+const SettingsDialog = ({
+  settingsOpen,
+  setSettingsOpen,
+}: {
+  settingsOpen: boolean;
+  setSettingsOpen: (settingsOpen: boolean) => void;
+}) => {
+  const apiKey = useLocalStorageString("apiKey", "");
+  const baseURL = useLocalStorageString("baseURL", "");
+
+  const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  return (
+    <Dialog
+      open={settingsOpen}
+      onClose={() => setSettingsOpen(false)}
+      className="relative z-50"
+      initialFocus={saveSettingsButtonRef}
+    >
+      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div className="fixed inset-0 flex w-screen items-start sm:items-center justify-center p-0 sm:p-4 max-h-dvh">
+        <Dialog.Panel className="shadow-xl rounded-b-lg sm:rounded-lg p-4 border max-w-none sm:max-w-xl w-full gap-2 bg-white max-h-full flex flex-col">
+          <div>
+            <div className="w-full flex justify-between">
+              <Dialog.Title className="font-bold text-lg">
+                Settings
+              </Dialog.Title>
+              <button
+                className="focus:outline-none text-slate-600 hover:text-slate-800"
+                onClick={() => setSettingsOpen(false)}
+              >
+                <X className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+              </button>
+            </div>
+            <Dialog.Description className="text-slate-500">
+              Configure settings for the chat playground.
+            </Dialog.Description>
+          </div>
+
+          <div className="flex flex-col gap-4 py-4 pb-8">
+            {/* base url */}
+            <div className="w-full">
+              <label
+                htmlFor="base-url"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Base URL
+              </label>
+              <input
+                value={baseURL.value}
+                onChange={(e) => baseURL.setValue(e.target.value)}
+                type="url"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Enter the base URL for the OpenAI API"
+              />
+            </div>
+            {/* api key */}
+            <div className="w-full">
+              <label
+                htmlFor="api-key"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                API Key
+              </label>
+              <input
+                value={apiKey.value}
+                onChange={(e) => apiKey.setValue(e.target.value)}
+                type="password"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Enter the API key for the OpenAI API"
+              />
+            </div>
+          </div>
+          <button
+            className="p-2 px-4 w-full sm:w-auto rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+            onClick={() => {
+              apiKey.save();
+              baseURL.save();
+              setSettingsOpen(false);
+            }}
+            ref={saveSettingsButtonRef}
+          >
+            Save
+          </button>
+        </Dialog.Panel>
+      </div>
+    </Dialog>
+  );
+};
+
+const SamplingSettingsDialog = ({
+  settingsOpen,
+  setSettingsOpen,
+}: {
+  settingsOpen: boolean;
+  setSettingsOpen: (settingsOpen: boolean) => void;
+}) => {
+  const model = useLocalStorageString("model", "gpt-3.5-turbo");
+  const seed = useLocalStorageNumber("seed", -1);
+  const temperature = useLocalStorageNumber("temperature", 0.5);
+  const maxTokens = useLocalStorageNumber("maxTokens", -1);
+  const topP = useLocalStorageNumber("topP", 1);
+  const presencePenalty = useLocalStorageNumber("presencePenalty", 0);
+  const frequencyPenalty = useLocalStorageNumber("frequencyPenalty", 0);
+  const jsonMode = useLocalStorageBoolean("jsonMode", false);
+  const [stopSequence, setStopSequence] = useState<string>("");
+  const stop = useLocalStorage<string[] | null>({
+    key: "stop",
+    initialValue: null,
+    serialize: (value) => JSON.stringify(value),
+    deserialize: (value) => JSON.parse(value),
+  });
+
+  const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  return (
+    <Dialog
+      open={settingsOpen}
+      onClose={() => setSettingsOpen(false)}
+      className="relative z-50"
+      initialFocus={saveSettingsButtonRef}
+    >
+      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+      <div className="fixed inset-0 flex w-screen items-start sm:items-center justify-center p-0 sm:p-4 max-h-dvh">
+        <Dialog.Panel className="shadow-xl rounded-b-lg sm:rounded-lg border max-w-none sm:max-w-xl w-full bg-white p-4 gap-2 flex flex-col max-h-dvh">
+          <div>
+            <div className="flex justify-between">
+              <Dialog.Title className="font-bold text-lg">
+                Request Settings
+              </Dialog.Title>
+              <button
+                className="focus:outline-none text-slate-600 hover:text-slate-800"
+                onClick={() => setSettingsOpen(false)}
+              >
+                <X className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+              </button>
+            </div>
+            <Dialog.Description className="text-slate-500">
+              Configure request settings for the chat playground.
+            </Dialog.Description>
+          </div>
+          <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2">
+            {/* model */}
+            <div className="w-ful">
+              <label
+                htmlFor="model"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Model
+              </label>
+              <input
+                value={model.value}
+                onChange={(e) => model.setValue(e.target.value)}
+                type="text"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Model name"
+              />
+            </div>
+            {/* seed */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="seed"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Seed
+              </label>
+              <input
+                value={seed.value}
+                onChange={(e) => seed.setValue(parseInt(e.target.value))}
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Seed value. Enter -1 for random."
+              />
+            </div>
+            {/* temperature */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="temperature"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Temperature
+              </label>
+              <input
+                value={temperature.value}
+                onChange={(e) =>
+                  temperature.setValue(parseFloat(e.target.value))
+                }
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-2000"
+                placeholder="Sampling temperature. Enter 0 for deterministic decoding."
+              />
+            </div>
+            {/* max tokens */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="max-tokens"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Max Tokens
+              </label>
+              <input
+                value={maxTokens.value}
+                onChange={(e) => maxTokens.setValue(parseInt(e.target.value))}
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Maximum number of tokens to generate. Enter -1 for no limit."
+              />
+            </div>
+            {/* stop */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="stop"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Stop Sequences
+              </label>
+              <div className="flex">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (stopSequence === "") {
+                      return;
+                    }
+                    // check if stopSequence already in stop
+                    if (stop.value && stop.value.includes(stopSequence)) {
+                      return;
+                    }
+                    stop.setValue([...(stop.value || []), stopSequence]);
+                    setStopSequence("");
+                  }}
+                  className="flex w-full"
+                >
+                  <input
+                    value={stopSequence}
+                    onChange={(e) => setStopSequence(e.target.value)}
+                    type="text"
+                    className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                    placeholder="Stop sequence used to stop generation."
+                  />
+                  <button
+                    type="submit"
+                    className="p-1 sm:p-2 focus:outline-none focus:ring-none rounded-lg"
+                  >
+                    Add
+                  </button>
+                </form>
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {stop.value &&
+                  stop.value.map((stopSequence, index) => (
+                    <div
+                      key={index}
+                      className="text-slate-800 bg-slate-200 rounded text-sm"
+                    >
+                      <button
+                        onClick={() => {
+                          if (stop.value) {
+                            stop.setValue(
+                              stop.value.filter((_, i) => i !== index)
+                            );
+                          }
+                        }}
+                        className="p-1 sm:p-2 focus:ring-none rounded-lg border border-none focus:border-none flex items-center gap-1 hover:text-slate-900"
+                      >
+                        {stopSequence}
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            {/* Top P */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="top-p"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Top P
+              </label>
+              <input
+                value={topP.value}
+                onChange={(e) => topP.setValue(parseFloat(e.target.value))}
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Enter the top p for the OpenAI API"
+              />
+            </div>
+            {/* Frequency Penalty */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="frequency-penalty"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Frequency Penalty
+              </label>
+              <input
+                value={frequencyPenalty.value}
+                onChange={(e) =>
+                  frequencyPenalty.setValue(parseFloat(e.target.value))
+                }
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Enter the frequency penalty for the OpenAI API"
+              />
+            </div>
+            {/* Presence Penalty */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="presence-penalty"
+                className="text-slate-800 dark:text-slate-4000 text-sm font-bold"
+              >
+                Presence Penalty
+              </label>
+              <input
+                value={presencePenalty.value}
+                onChange={(e) =>
+                  presencePenalty.setValue(parseFloat(e.target.value))
+                }
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Enter the presence penalty for the OpenAI API"
+              />
+            </div>
+            {/* JSON Mode */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="json-mode"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                JSON Mode
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  checked={jsonMode.value}
+                  onChange={(e) => jsonMode.setValue(e.target.checked)}
+                  type="checkbox"
+                  className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded border border-slate-200"
+                  placeholder="Enter the model for the OpenAI API"
+                  id="json-mode"
+                />
+                <label htmlFor="json-mode" className="text-sm">
+                  Enabled
+                </label>
+              </div>
+            </div>
+          </div>
+          <div>
+            <button
+              className="p-2 px-4 w-full sm:w-auto rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+              onClick={() => {
+                model.save();
+                seed.save();
+                temperature.save();
+                maxTokens.save();
+                topP.save();
+                presencePenalty.save();
+                frequencyPenalty.save();
+                jsonMode.save();
+                stop.save();
+                setSettingsOpen(false);
+              }}
+              ref={saveSettingsButtonRef}
+            >
+              Save
+            </button>
+          </div>
+        </Dialog.Panel>
+      </div>
+    </Dialog>
+  );
+};
+
 export default function Home() {
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [samplingSettingsOpen, setSamplingSettingsOpen] = useState(false);
   const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [apiKey, setApiKey] = useState<string>("");
-  const [baseURL, setBaseURL] = useState<string>("");
   const deleteMessage = (index: number) => {
     const newMessages = [...messages];
     newMessages.splice(index, 1);
@@ -354,12 +802,6 @@ export default function Home() {
         setAbortController(null);
       });
   };
-  useEffect(() => {
-    if (settingsOpen) {
-      setApiKey(localStorage.getItem("apiKey") || "");
-      setBaseURL(localStorage.getItem("baseURL") || "");
-    }
-  }, [settingsOpen]);
   return (
     <main
       className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-24 bg-stone-200 dark:bg-slate-800 relative"
@@ -402,75 +844,31 @@ export default function Home() {
             <button
               onClick={() => setSettingsOpen(!settingsOpen)}
               className="focus:outline-none"
+              title="settings"
             >
               <Settings className="w-5 h-5 text-slate-500 hover:text-slate-800" />
             </button>
+            <button
+              onClick={() => setSamplingSettingsOpen(!samplingSettingsOpen)}
+              className="focus:outline-none"
+              title="Request settings"
+            >
+              <Settings2 className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+            </button>
           </div>
         </div>
-        <Dialog
-          open={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          className="relative z-50"
-          initialFocus={saveSettingsButtonRef}
-        >
-          <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-          <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-            <Dialog.Panel className="shadow-xl rounded-lg p-4 border max-w-xl w-full gap-4 bg-white">
-              <Dialog.Title className="font-bold text-lg">
-                Settings
-              </Dialog.Title>
-              <Dialog.Description className="text-slate-500">
-                Configure settings for the chat playground.
-              </Dialog.Description>
-
-              <div className="flex flex-col gap-4 py-4 pb-8">
-                {/* base url */}
-                <div className="w-full">
-                  <label
-                    htmlFor="base-url"
-                    className="text-slate-800 dark:text-slate-400 text-sm font-bold"
-                  >
-                    Base URL
-                  </label>
-                  <input
-                    value={baseURL}
-                    onChange={(e) => setBaseURL(e.target.value)}
-                    type="url"
-                    className="w-full p-1 sm:p-2 focus:outline-emerald-600 rounded-lg border border-slate-200"
-                    placeholder="Enter the base URL for the OpenAI API"
-                  />
-                </div>
-                {/* api key */}
-                <div className="w-full">
-                  <label
-                    htmlFor="api-key"
-                    className="text-slate-800 dark:text-slate-400 text-sm font-bold"
-                  >
-                    API Key
-                  </label>
-                  <input
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    type="password"
-                    className="w-full p-1 sm:p-2 focus:outline-emerald-600 rounded-lg border border-slate-200"
-                    placeholder="Enter the API key for the OpenAI API"
-                  />
-                </div>
-              </div>
-              <button
-                className="p-2 px-4 w-full sm:w-auto rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
-                onClick={() => {
-                  setSettingsOpen(false);
-                  localStorage.setItem("apiKey", apiKey || "");
-                  localStorage.setItem("baseURL", baseURL || "");
-                }}
-                ref={saveSettingsButtonRef}
-              >
-                Save
-              </button>
-            </Dialog.Panel>
-          </div>
-        </Dialog>
+        {settingsOpen && (
+          <SettingsDialog
+            settingsOpen={settingsOpen}
+            setSettingsOpen={setSettingsOpen}
+          />
+        )}
+        {samplingSettingsOpen && (
+          <SamplingSettingsDialog
+            settingsOpen={samplingSettingsOpen}
+            setSettingsOpen={setSamplingSettingsOpen}
+          />
+        )}
         <div className="w-full h-full flex flex-col items-start gap-2 overflow-y-auto pb-4">
           <ul className="flex flex-col w-full divide-y divide-slate-200">
             {messages.map((message, index) => {
