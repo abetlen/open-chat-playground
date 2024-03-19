@@ -52,7 +52,7 @@ const createChatCompletion = (
       model,
       seed: seed === "" ? undefined : parseInt(seed),
       temperature: temperature === "" ? undefined : parseFloat(temperature),
-      max_tokens: maxTokens === "" ? undefined : parseInt(maxTokens),
+      max_tokens: maxTokens === "" ? undefined : parseInt(maxTokens) < 0 ? undefined : parseInt(maxTokens),
       stop: stop === "[]" ? undefined : JSON.parse(stop),
       frequency_penalty:
         frequencyPenalty === "" ? undefined : parseFloat(frequencyPenalty),
