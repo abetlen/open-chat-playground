@@ -33,13 +33,13 @@ const createChatCompletion = (
 ) => {
   const baseURL = localStorage.getItem("baseURL");
   const apiKey = localStorage.getItem("apiKey") || "";
-  const model = localStorage.getItem("model") || "gpt-3.5-turbo";
-  const seed = localStorage.getItem("seed") || "-1";
-  const temperature = localStorage.getItem("temperature") || "0.5";
-  const maxTokens = localStorage.getItem("maxTokens") || "-1";
-  const frequencyPenalty = localStorage.getItem("frequencyPenalty") || "0";
-  const presencePenalty = localStorage.getItem("presencePenalty") || "0";
-  const stop = localStorage.getItem("stop") || "[]";
+  const model = localStorage.getItem("model");
+  const seed = localStorage.getItem("seed");
+  const temperature = localStorage.getItem("temperature");
+  const maxTokens = localStorage.getItem("maxTokens");
+  const frequencyPenalty = localStorage.getItem("frequencyPenalty");
+  const presencePenalty = localStorage.getItem("presencePenalty");
+  const stop = localStorage.getItem("stop");
   const jsonMode = localStorage.getItem("jsonMode") === "true";
   const openai = new OpenAI({
     baseURL: baseURL === "" ? undefined : baseURL,
@@ -49,15 +49,15 @@ const createChatCompletion = (
   return openai.chat.completions.create(
     {
       messages: messages,
-      model,
-      seed: seed === "" ? undefined : parseInt(seed),
-      temperature: temperature === "" ? undefined : parseFloat(temperature),
-      max_tokens: maxTokens === "" ? undefined : parseInt(maxTokens) < 0 ? undefined : parseInt(maxTokens),
-      stop: stop === "[]" ? undefined : JSON.parse(stop),
+      model: model !== null ? model : "",
+      seed: seed !== null ? parseInt(seed) : undefined,
+      temperature: temperature !== null ? parseFloat(temperature) : undefined,
+      max_tokens: maxTokens !== null ? parseInt(maxTokens) : undefined,
+      stop: stop !== null ? JSON.parse(stop) : undefined,
       frequency_penalty:
-        frequencyPenalty === "" ? undefined : parseFloat(frequencyPenalty),
+        frequencyPenalty !== null ? parseFloat(frequencyPenalty) : undefined,
       presence_penalty:
-        presencePenalty === "" ? undefined : parseFloat(presencePenalty),
+        presencePenalty !== null ? parseFloat(presencePenalty) : undefined,
       stream: true,
       response_format: jsonMode ? { type: "json_object" } : undefined,
     },
@@ -189,6 +189,9 @@ const useLocalStorage = <T,>({
   deserialize: (value: string) => T;
 }) => {
   const current = localStorage.getItem(key);
+  if (current === null) {
+    localStorage.setItem(key, serialize(initialValue));
+  }
   const [value, setValue] = useState<T>(
     current ? deserialize(current) : initialValue
   );
