@@ -53,7 +53,12 @@ const createChatCompletion = (
       model: model !== null ? model : "",
       seed: seed !== null ? parseInt(seed) : undefined,
       temperature: temperature !== null ? parseFloat(temperature) : undefined,
-      max_tokens: maxTokens !== null ? (parseInt(maxTokens) < 0 ? undefined : parseInt(maxTokens)) : undefined,
+      max_tokens:
+        maxTokens !== null
+          ? parseInt(maxTokens) < 0
+            ? undefined
+            : parseInt(maxTokens)
+          : undefined,
       stop: stop !== null ? JSON.parse(stop) : undefined,
       frequency_penalty:
         frequencyPenalty !== null ? parseFloat(frequencyPenalty) : undefined,
@@ -858,13 +863,6 @@ export default function Home() {
               title="Request settings"
             >
               <Settings2 className="w-5 h-5 text-slate-500 hover:text-slate-800" />
-            </button>
-            <button
-              onClick={() => setSamplingSettingsOpen(!samplingSettingsOpen)}
-              className="focus:outline-none"
-              title="Request settings"
-            >
-              <Hammer className="w-5 h-5 text-slate-500 hover:text-slate-800" />
             </button>
           </div>
         </div>
