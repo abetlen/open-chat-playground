@@ -382,6 +382,7 @@ const CopyButton = ({ value }: { value: string }) => {
         setCopied(true);
         await copyToClipboard(value);
       }}
+      title="Copy to clipboard"
     >
       {copied ? (
         <ClipboardCheck className="w-5 h-5" />
@@ -520,7 +521,7 @@ const SamplingSettingsDialog = ({
           <div>
             <div className="flex justify-between">
               <Dialog.Title className="font-bold text-lg">
-                Request Settings
+                Request Parameters
               </Dialog.Title>
               <button
                 className="focus:outline-none text-slate-600 hover:text-slate-800"
@@ -530,7 +531,7 @@ const SamplingSettingsDialog = ({
               </button>
             </div>
             <Dialog.Description className="text-slate-500">
-              Configure request settings for the chat playground.
+              Configure parameters for chat completion requests.
             </Dialog.Description>
           </div>
           <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2">
@@ -853,18 +854,18 @@ export default function Home() {
           <div className="flex gap-2">
             <CopyButton value={JSON.stringify(messages, null, 2)} />
             <button
-              onClick={() => setSettingsOpen(!settingsOpen)}
-              className="focus:outline-none"
-              title="settings"
-            >
-              <Settings className="w-5 h-5 text-slate-500 hover:text-slate-800" />
-            </button>
-            <button
               onClick={() => setSamplingSettingsOpen(!samplingSettingsOpen)}
               className="focus:outline-none"
-              title="Request settings"
+              title="Request Parameters"
             >
               <Settings2 className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+            </button>
+            <button
+              onClick={() => setSettingsOpen(!settingsOpen)}
+              className="focus:outline-none"
+              title="Settings"
+            >
+              <Settings className="w-5 h-5 text-slate-500 hover:text-slate-800" />
             </button>
           </div>
         </div>
