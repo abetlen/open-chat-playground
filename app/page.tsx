@@ -11,6 +11,7 @@ import {
   Settings2,
   X,
   Hammer,
+  Plus,
 } from "lucide-react";
 
 import { Dialog } from "@headlessui/react";
@@ -621,7 +622,7 @@ const SamplingSettingsDialog = ({
                     stop.setValue([...(stop.value || []), stopSequence]);
                     setStopSequence("");
                   }}
-                  className="flex w-full"
+                  className="flex w-full gap-2"
                 >
                   <input
                     value={stopSequence}
@@ -632,9 +633,10 @@ const SamplingSettingsDialog = ({
                   />
                   <button
                     type="submit"
-                    className="p-1 sm:p-2 focus:outline-none focus:ring-none rounded-lg"
+                    disabled={stopSequence === ""}
+                    className="p-1 sm:p-2 focus:outline-none focus:ring-none rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 disabled:bg-slate-100"
                   >
-                    Add
+                    <Plus className="w-5 h-5" />
                   </button>
                 </form>
               </div>
