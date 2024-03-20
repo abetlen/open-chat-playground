@@ -28,9 +28,14 @@ import remarkMath from "remark-math";
 import "katex/dist/katex.min.css"; // `rehype-katex` does not import the CSS for you
 
 import OpenAI from "openai";
+import {
+  ChatCompletionRole,
+  ChatCompletionMessage,
+  ChatCompletionMessageParam,
+} from "openai/resources/chat/index";
 
 const createChatCompletion = (
-  messages: any,
+  messages: ChatCompletionMessageParam[],
   { signal }: { signal: AbortSignal }
 ) => {
   const baseURL = localStorage.getItem("baseURL");
@@ -176,13 +181,13 @@ const reactMarkdownComponents = {
   },
 };
 
-const INITIAL_MESSAGES = [
+const INITIAL_MESSAGES: ChatCompletionMessageParam[] = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is the capital of France?" },
   { role: "assistant", content: "Paris is the capital of France." },
 ];
 
-const ROLES = ["system", "user", "assistant"];
+const ROLES: ChatCompletionRole[] = ["system", "user", "assistant"];
 
 const useLocalStorage = <T,>({
   key,
@@ -275,39 +280,22 @@ const ChatMessage = ({
   editing,
   setEditing,
 }: {
-  message: any;
-  setMessage: any;
+  message: ChatCompletionMessageParam;
+  setMessage: (message: ChatCompletionMessageParam) => void;
   deleteMessage: () => void;
   editing: boolean;
   setEditing: (editing: boolean) => void;
 }) => {
-  const cycleMessageRole = () => {
-    const newMessage = { ...message };
-    newMessage.role =
-      ROLES[(ROLES.indexOf(newMessage.role) + 1) % ROLES.length];
-    setMessage(newMessage);
-  };
-  const addImage = () => {
-    const newMessage = { ...message };
-    if (typeof newMessage.content === "string") {
-      newMessage.content = [
-        {
-          type: "text",
-          content: newMessage.content,
-        },
-      ];
-    }
-    newMessage.content.push({
-      type: "image_url",
-      image_url: { url: "https://via.placeholder.com/150" },
-    });
-    setMessage(newMessage);
-  };
   return (
     <div className="flex flex-col sm:flex-row w-full gap-1 sm:gap-2 group hover:bg-slate-200 p-1 py-2 sm:p-4 rounded-lg items-baseline grow flex-1">
       <div className="min-w-28 flex justify-between w-full sm:w-auto pr-1">
         <button
-          onClick={cycleMessageRole}
+          onClick={() => {
+            const newMessage = { ...message };
+            newMessage.role =
+              ROLES[(ROLES.indexOf(newMessage.role) + 1) % ROLES.length];
+            setMessage(newMessage);
+          }}
           className="uppercase font-bold text-left group-hover:bg-slate-300 p-1 px-2 sm:p-2 rounded-lg text-sm"
         >
           {message.role}
@@ -322,18 +310,20 @@ const ChatMessage = ({
           onClick={() => setEditing(true)}
           className="block data-[editing=true]:hidden flex-1 h-full w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap select-text"
         >
-          {message.content.length > 0 && (
-            <>
-              <Markdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[rehypeKatex]}
-                components={reactMarkdownComponents}
-              >
-                {message.content}
-              </Markdown>
-            </>
-          )}
-          {message.content.length === 0 && (
+          {message.content &&
+            typeof message.content === "string" &&
+            message.content.length > 0 && (
+              <>
+                <Markdown
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeKatex]}
+                  components={reactMarkdownComponents}
+                >
+                  {message.content}
+                </Markdown>
+              </>
+            )}
+          {message.content && message.content.length === 0 && (
             <>
               <span className="text-slate-600">
                 Enter a {message.role} message here.
@@ -787,25 +777,30 @@ export default function Home() {
     });
   };
   const sendMessage = () => {
-    setMessages((messages) => [
-      ...messages,
-      { role: "assistant", content: "" },
-    ]);
+    setMessages((messages) => [...messages, { role: "assistant", content: null }]);
     const abortController = new AbortController();
     setAbortController(abortController);
     const signal = abortController.signal;
     createChatCompletion(messages, { signal })
       .then(async (responseStream) => {
         for await (const message of responseStream) {
-          if (!message.choices[0].delta.content) {
+          const content = message.choices[0].delta.content;
+          if (!content) {
             continue;
           }
           setMessages((messages) => {
-            const lastMessageContent = messages[messages.length - 1].content;
-            const delta = message.choices[0].delta.content;
+            const lastMessage = messages[
+              messages.length - 1
+            ] as ChatCompletionMessage;
+            const lastMessageContent = lastMessage.content;
             return [
               ...messages.slice(0, -1),
-              { role: "assistant", content: lastMessageContent + delta },
+              {
+                role: "assistant",
+                content: lastMessageContent
+                  ? lastMessageContent + content
+                  : content,
+              },
             ];
           });
         }
