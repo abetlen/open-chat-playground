@@ -575,6 +575,58 @@ const SamplingSettingsDialog = ({
                 placeholder="Sampling temperature. Enter 0 for deterministic decoding."
               />
             </div>
+            {/* Top P */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="top-p"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Top P
+              </label>
+              <input
+                value={topP.value}
+                onChange={(e) => topP.setValue(parseFloat(e.target.value))}
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Enter the top p for the OpenAI API"
+              />
+            </div>
+            {/* Frequency Penalty */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="frequency-penalty"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Frequency Penalty
+              </label>
+              <input
+                value={frequencyPenalty.value}
+                onChange={(e) =>
+                  frequencyPenalty.setValue(parseFloat(e.target.value))
+                }
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Enter the frequency penalty for the OpenAI API"
+              />
+            </div>
+            {/* Presence Penalty */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor="presence-penalty"
+                className="text-slate-800 dark:text-slate-4000 text-sm font-bold"
+              >
+                Presence Penalty
+              </label>
+              <input
+                value={presencePenalty.value}
+                onChange={(e) =>
+                  presencePenalty.setValue(parseFloat(e.target.value))
+                }
+                type="number"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Enter the presence penalty for the OpenAI API"
+              />
+            </div>
             {/* max tokens */}
             <div className="w-full flex flex-col gap-2">
               <label
@@ -654,58 +706,6 @@ const SamplingSettingsDialog = ({
                     </div>
                   ))}
               </div>
-            </div>
-            {/* Top P */}
-            <div className="w-full flex flex-col gap-2">
-              <label
-                htmlFor="top-p"
-                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
-              >
-                Top P
-              </label>
-              <input
-                value={topP.value}
-                onChange={(e) => topP.setValue(parseFloat(e.target.value))}
-                type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
-                placeholder="Enter the top p for the OpenAI API"
-              />
-            </div>
-            {/* Frequency Penalty */}
-            <div className="w-full flex flex-col gap-2">
-              <label
-                htmlFor="frequency-penalty"
-                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
-              >
-                Frequency Penalty
-              </label>
-              <input
-                value={frequencyPenalty.value}
-                onChange={(e) =>
-                  frequencyPenalty.setValue(parseFloat(e.target.value))
-                }
-                type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
-                placeholder="Enter the frequency penalty for the OpenAI API"
-              />
-            </div>
-            {/* Presence Penalty */}
-            <div className="w-full flex flex-col gap-2">
-              <label
-                htmlFor="presence-penalty"
-                className="text-slate-800 dark:text-slate-4000 text-sm font-bold"
-              >
-                Presence Penalty
-              </label>
-              <input
-                value={presencePenalty.value}
-                onChange={(e) =>
-                  presencePenalty.setValue(parseFloat(e.target.value))
-                }
-                type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
-                placeholder="Enter the presence penalty for the OpenAI API"
-              />
             </div>
             {/* JSON Mode */}
             <div className="w-full flex flex-col gap-2">
