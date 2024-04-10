@@ -1561,7 +1561,6 @@ export default function Home() {
       const hasScrollBar =
         messageContainerRef.current.scrollHeight >
         messageContainerRef.current.clientHeight;
-      console.log(`isAtBottom: ${isAtBottom}, hasScrollBar: ${hasScrollBar}`);
       // show scroll button
       setShowScrollButton(hasScrollBar && !isAtBottom);
     };
@@ -1575,10 +1574,10 @@ export default function Home() {
       checkScroll();
     });
     // resize events
-    messageContainer.addEventListener("resize", checkScroll);
+    window.addEventListener("resize", checkScroll);
     return () => {
       messageContainer.removeEventListener("scroll", checkScroll);
-      messageContainer.removeEventListener("resize", checkScroll);
+      window.removeEventListener("resize", checkScroll);
     };
   }, [messages]);
   const deleteMessage = (index: number) => {
