@@ -437,7 +437,7 @@ const ContentArea = ({
           onClick={() => {
             setEditing(true);
           }}
-          className="text-left p-1 px-2 sm:p-2 group-hover:bg-white rounded-lg cursor-text"
+          className="text-left p-1 px-2 sm:p-2 group-hover:bg-white rounded-lg cursor-text w-full"
         >
           {value ? (
             <Markdown
@@ -837,34 +837,34 @@ const ChatMessage = ({
               </button> */}
               {(typeof message.content === "string" ||
                 !message.content.find((c) => c.type === "image_url")) && (
-                  <button
-                    title="Add image content"
-                    className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
-                    onClick={() => {
-                      const newMessage = {
-                        ...message,
-                        content: Array.isArray(message.content)
-                          ? message.content.concat([
-                              {
-                                type: "image_url" as const,
-                                image_url: { url: "" },
-                              },
-                            ])
-                          : [
-                              { type: "text" as const, text: message.content },
-                              {
-                                type: "image_url" as const,
-                                image_url: { url: "" },
-                              },
-                            ],
-                      };
-                      setMessage(newMessage);
-                    }}
-                  >
-                    {/* eslint-disable-next-line jsx-a11y/alt-text */}
-                    <Image className="w-5 h-5" />
-                  </button>
-                )}
+                <button
+                  title="Add image content"
+                  className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
+                  onClick={() => {
+                    const newMessage = {
+                      ...message,
+                      content: Array.isArray(message.content)
+                        ? message.content.concat([
+                            {
+                              type: "image_url" as const,
+                              image_url: { url: "" },
+                            },
+                          ])
+                        : [
+                            { type: "text" as const, text: message.content },
+                            {
+                              type: "image_url" as const,
+                              image_url: { url: "" },
+                            },
+                          ],
+                    };
+                    setMessage(newMessage);
+                  }}
+                >
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
+                  <Image className="w-5 h-5" />
+                </button>
+              )}
             </div>
           )}
         </div>
