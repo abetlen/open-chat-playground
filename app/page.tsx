@@ -602,7 +602,7 @@ const ChatMessage = ({
       ref={rootRef}
       className="flex flex-col sm:flex-row w-full gap-1 sm:gap-2 group hover:bg-slate-200 p-1 py-2 sm:p-4 rounded-lg items-baseline grow flex-1"
     >
-      <div className="min-w-28 flex justify-between w-full sm:w-auto pr-1">
+      <div className="w-28 flex justify-between pr-1">
         <button
           onClick={() => {
             const newMessage = { ...message };
@@ -623,7 +623,7 @@ const ChatMessage = ({
           <MinusCircle className="w-5 h-5 text-slate-400" />
         </button>
       </div>
-      <span className="flex-1 h-full w-full flex flex-col min-h-fit grow items-start">
+      <span className="flex-1 overflow-x-auto w-full sm:w-auto h-full flex flex-col min-h-fit items-start">
         <div className="flex flex-col w-full flex-1">
           {/* simple text content */}
           {typeof message.content === "string" && (
@@ -869,7 +869,7 @@ const ChatMessage = ({
           )}
         </div>
       </span>
-      <button onClick={deleteMessage} className="hidden sm:block">
+      <button onClick={deleteMessage} className="w-4 hidden sm:block">
         <MinusCircle className="w-4 h-4 text-transparent group-hover:text-slate-600" />
       </button>
     </div>
