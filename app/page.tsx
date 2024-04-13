@@ -860,6 +860,7 @@ const ChatMessage = ({
                       setMessage(newMessage);
                     }}
                   >
+                    {/* eslint-disable-next-line jsx-a11y/alt-text */}
                     <Image className="w-5 h-5" />
                   </button>
                 )}
