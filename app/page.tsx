@@ -10,11 +10,14 @@ import {
   ClipboardCheck,
   Settings2,
   X,
-  Hammer,
+  Wrench,
   Plus,
   Pencil,
-  Check,
   ArrowDown,
+  Type,
+  Image,
+  Check,
+  Paperclip,
 } from "lucide-react";
 
 import { Dialog } from "@headlessui/react";
@@ -65,7 +68,8 @@ const createChatCompletion = (
     {
       messages,
       tools: tools.length > 0 ? tools : undefined,
-      tool_choice: toolChoice !== "auto" ? toolChoice : undefined,
+      tool_choice:
+        toolChoice !== "auto" && tools.length > 0 ? toolChoice : undefined,
       model,
       seed: seed < 0 ? undefined : seed,
       temperature,
@@ -132,7 +136,7 @@ const reactMarkdownComponents = {
   },
   li: (props: any) => {
     const { children, ...rest } = props;
-    return <li className="flex">{children}</li>;
+    return <li>{children}</li>;
   },
   // links
   a: (props: any) => {
@@ -214,96 +218,96 @@ const INITIAL_SETTINGS: Settings = {
 };
 
 const INITIAL_TOOLS: ChatCompletionTool[] = [
-  {
-    type: "function",
-    function: {
-      name: "User",
-      description: "User record",
-      parameters: {
-        type: "object",
-        properties: {
-          name: { type: "string" },
-          age: { type: "number" },
-        },
-        required: ["name", "age"],
-      },
-    },
-  },
+  // {
+  //   type: "function",
+  //   function: {
+  //     name: "User",
+  //     description: "User record",
+  //     parameters: {
+  //       type: "object",
+  //       properties: {
+  //         name: { type: "string" },
+  //         age: { type: "number" },
+  //       },
+  //       required: ["name", "age"],
+  //     },
+  //   },
+  // },
 ];
 
 const INITIAL_TOOL_CHOICE: ChatCompletionToolChoiceOption = "auto";
 
 const INITIAL_MESSAGES: ChatCompletionMessageParam[] = [
   { role: "system", content: "You are a helpful assistant" },
-  { role: "user", content: "What is the capital of France?" },
-  { role: "assistant", content: "Paris is the capital of France." },
-  {
-    role: "user",
-    content: [
-      {
-        type: "text",
-        text: "What does this image say?",
-      },
-      {
-        type: "image_url",
-        image_url: {
-          url: "https://user-images.githubusercontent.com/1991296/230134379-7181e485-c521-4d23-a0d6-f7b3b61ba524.png",
-        },
-      },
-    ],
-  },
-  {
-    role: "assistant",
-    content: "The image says llama c++",
-  },
-  {
-    role: "user",
-    content: "Extract Jason is 30 years old.",
-  },
-  {
-    role: "assistant",
-    content: null,
-    tool_calls: [
-      {
-        id: "call__0_User_cmpl-9dce87d7-1e16-4e40-b096-37ba7ae17dce",
-        type: "function",
-        function: {
-          name: "User",
-          arguments: '{ "name": "Jason", "age": 30 }',
-        },
-      },
-    ],
-    function_call: {
-      name: "User",
-      arguments: '{ "name": "Jason", "age": 30 }',
-    },
-  },
-  {
-    role: "user",
-    content: "What is the capital of France and Germany?",
-  },
-  {
-    role: "assistant",
-    content: null,
-    tool_calls: [
-      {
-        id: "call__0_get_capital_cmpl-9dce87d7-1e16-4e40-b096-37ba7ae17dce",
-        type: "function",
-        function: {
-          name: "get_capital",
-          arguments: '{ "country": "France" }',
-        },
-      },
-      {
-        id: "call__1_get_capital_cmpl-9dce87d7-1e16-4e40-b096-37ba7ae17dce",
-        type: "function",
-        function: {
-          name: "get_capital",
-          arguments: '{ "country": "Germany" }',
-        },
-      },
-    ],
-  },
+  // { role: "user", content: "What is the capital of France?" },
+  // { role: "assistant", content: "Paris is the capital of France." },
+  // {
+  //   role: "user",
+  //   content: [
+  //     {
+  //       type: "text",
+  //       text: "What does this image say?",
+  //     },
+  //     {
+  //       type: "image_url",
+  //       image_url: {
+  //         url: "https://user-images.githubusercontent.com/1991296/230134379-7181e485-c521-4d23-a0d6-f7b3b61ba524.png",
+  //       },
+  //     },
+  //   ],
+  // },
+  // {
+  //   role: "assistant",
+  //   content: "The image says llama c++",
+  // },
+  // {
+  //   role: "user",
+  //   content: "Extract Jason is 30 years old.",
+  // },
+  // {
+  //   role: "assistant",
+  //   content: null,
+  //   tool_calls: [
+  //     {
+  //       id: "call__0_User_cmpl-9dce87d7-1e16-4e40-b096-37ba7ae17dce",
+  //       type: "function",
+  //       function: {
+  //         name: "User",
+  //         arguments: '{ "name": "Jason", "age": 30 }',
+  //       },
+  //     },
+  //   ],
+  //   function_call: {
+  //     name: "User",
+  //     arguments: '{ "name": "Jason", "age": 30 }',
+  //   },
+  // },
+  // {
+  //   role: "user",
+  //   content: "What is the capital of France and Germany?",
+  // },
+  // {
+  //   role: "assistant",
+  //   content: null,
+  //   tool_calls: [
+  //     {
+  //       id: "call__0_get_capital_cmpl-9dce87d7-1e16-4e40-b096-37ba7ae17dce",
+  //       type: "function",
+  //       function: {
+  //         name: "get_capital",
+  //         arguments: '{ "country": "France" }',
+  //       },
+  //     },
+  //     {
+  //       id: "call__1_get_capital_cmpl-9dce87d7-1e16-4e40-b096-37ba7ae17dce",
+  //       type: "function",
+  //       function: {
+  //         name: "get_capital",
+  //         arguments: '{ "country": "Germany" }',
+  //       },
+  //     },
+  //   ],
+  // },
   // {
   //   role: "user",
   //   content: "What is the capital of France and Germany?",
@@ -403,6 +407,57 @@ const ResizeableTextarea = (props: any) => {
   return <textarea ref={textAreaRef} rows={1} {...props} />;
 };
 
+const ContentArea = ({
+  role, // TODO: should probably just be placeholder
+  value,
+  onChange,
+}: {
+  role: ChatCompletionRole;
+  value: string;
+  onChange: (value: string) => void;
+}) => {
+  const [editing, setEditing] = useState(false);
+  return (
+    <>
+      {editing ? (
+        <ResizeableTextarea
+          value={value}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
+            onChange(e.target.value);
+          }}
+          placeholder={`Enter a ${role} message here.`}
+          className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 border-none outline-none focus:border-none rounded-lg resize-none overflow-hidden group-hover:bg-white focus:bg-white bg-transparent"
+          autoFocus
+          onBlur={() => {
+            setEditing(false);
+          }}
+        />
+      ) : (
+        <button
+          onClick={() => {
+            setEditing(true);
+          }}
+          className="text-left flex flex-col p-1 px-2 sm:p-2 w-full group-hover:bg-white rounded-lg cursor-text"
+        >
+          {value ? (
+            <Markdown
+              remarkPlugins={[remarkGfm, remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+              components={reactMarkdownComponents}
+            >
+              {value}
+            </Markdown>
+          ) : (
+            <div className="text-slate-400">
+              {`Enter a ${role} message here.`}
+            </div>
+          )}
+        </button>
+      )}
+    </>
+  );
+};
+
 const ImageEdit = ({
   url,
   setUrl,
@@ -415,18 +470,20 @@ const ImageEdit = ({
   const [editing, setEditing] = useState(url === "");
   useEffect(() => {
     document.onpaste = (event: ClipboardEvent) => {
-      const items = (event.clipboardData || event.originalEvent.clipboardData)
-        .items;
+      const items = event.clipboardData?.items;
+      if (!items) return;
       for (const index in items) {
         const item = items[index];
         if (item.kind === "file") {
           const blob = item.getAsFile();
           const reader = new FileReader();
           reader.onload = function (event) {
-            setUrl(event.target?.result);
+            setUrl(event.target?.result as string);
             setEditing(false);
           }; // data url!
-          reader.readAsDataURL(blob);
+          if (blob) {
+            reader.readAsDataURL(blob);
+          }
         }
       }
     };
@@ -439,8 +496,8 @@ const ImageEdit = ({
   return (
     <>
       {!editing ? (
-        <div className="w-full h-full relative px-2">
-          <div className="absolute top-0 right-0 px-2">
+        <div className="w-full h-full relative px-2 group">
+          <div className="absolute top-0 right-0 px-2 group-hover:opacity-100 opacity-20">
             <button
               className="text-white z-50 bg-black p-4"
               onClick={() => {
@@ -463,36 +520,59 @@ const ImageEdit = ({
           <img src={url} alt="" />
         </div>
       ) : (
-        <div className="flex">
+        <div className="flex items-center">
           {/* url input */}
           <input
             type="text"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
+            placeholder="Enter image URL or paste image here."
           />
           {/* file input */}
-          <input
-            type="file"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              // check file is (png, jpg, jpeg, webp, or gif)
-              const validImageTypes = ["image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"];
-              if (file && validImageTypes.includes(file.type)) {
-                // create base64 data url
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                  setUrl(event.target?.result as string);
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
-          />
+          <label className="p-2 cursor-pointer">
+            <Paperclip className="w-5 h-5 text-slate-600 hover:text-slate-800" />
+            <input
+              type="file"
+              hidden={true}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                // check file is (png, jpg, jpeg, webp, or gif)
+                const validImageTypes = [
+                  "image/png",
+                  "image/jpeg",
+                  "image/jpg",
+                  "image/webp",
+                  "image/gif",
+                ];
+                if (file && validImageTypes.includes(file.type)) {
+                  // create base64 data url
+                  const reader = new FileReader();
+                  reader.onload = function (event) {
+                    setUrl(event.target?.result as string);
+                    setEditing(false);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+          </label>
+          {url && (
+            <button
+              onClick={() => {
+                setEditing(false);
+              }}
+              className="p-2"
+            >
+              <Check className="w-5 h-5" />
+            </button>
+          )}
           {/* delete button */}
           <button
             onClick={() => {
               deleteImage();
             }}
+            className="p-2"
           >
             <X className="w-5 h-5" />
           </button>
@@ -520,12 +600,6 @@ const ChatMessage = ({
     <div
       ref={rootRef}
       className="flex flex-col sm:flex-row w-full gap-1 sm:gap-2 group hover:bg-slate-200 p-1 py-2 sm:p-4 rounded-lg items-baseline grow flex-1"
-      onBlur={(e) => {
-        if (rootRef.current?.contains(e.relatedTarget as Node)) {
-          return;
-        }
-        setEditing(false);
-      }}
     >
       <div className="min-w-28 flex justify-between w-full sm:w-auto pr-1">
         <button
@@ -535,147 +609,83 @@ const ChatMessage = ({
               ROLES[(ROLES.indexOf(newMessage.role) + 1) % ROLES.length];
             setMessage(newMessage);
           }}
+          title="Change role"
           className="uppercase font-bold text-left group-hover:bg-slate-300 p-1 px-2 sm:p-2 rounded-lg text-sm"
         >
           {message.role}
         </button>
-        <button onClick={deleteMessage} className="block sm:hidden">
+        <button
+          onClick={deleteMessage}
+          className="block sm:hidden"
+          title="Delete message"
+        >
           <MinusCircle className="w-5 h-5 text-slate-400" />
         </button>
       </div>
       <span className="flex-1 h-full w-full flex flex-col min-h-fit grow items-start">
-        {/* display view */}
-        {!editing && (
-          <button
-            data-editing={editing}
-            onClick={() => setEditing(true)}
-            className="flex flex-col data-[editing=true]:hidden flex-1 h-full w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap select-text"
-          >
-            {message.content &&
-              typeof message.content === "string" &&
-              message.content.length > 0 && (
-                <>
-                  <Markdown
-                    remarkPlugins={[remarkGfm, remarkMath]}
-                    rehypePlugins={[rehypeKatex]}
-                    components={reactMarkdownComponents}
-                  >
-                    {message.content}
-                  </Markdown>
-                </>
-              )}
-            {message.content && Array.isArray(message.content) && (
-              <>
-                <div className="flex flex-col gap-4">
-                  {message.content.map((item, index) => {
-                    if (item.type === "text") {
-                      return (
-                        <Markdown
-                          key={index}
-                          remarkPlugins={[remarkGfm, remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                          components={reactMarkdownComponents}
-                          className={"py-2"}
-                        >
-                          {item.text}
-                        </Markdown>
-                      );
-                    } else if (item.type === "image_url") {
-                      return (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img key={index} src={item.image_url.url} alt="" />
-                      );
-                    }
-                  })}
-                </div>
-              </>
-            )}
-            {message.content?.length === 0 && (
-              <>
-                <span className="text-slate-600">
-                  Enter a {message.role} message here.
-                </span>
-              </>
-            )}
-            {message.role === "assistant" &&
-              message.tool_calls &&
-              message.tool_calls.map((toolCall) => (
-                <div key={toolCall.id} className="flex flex-col gap-2">
-                  <div>
-                    <div className="bg-emerald-300 text-emerald-900 p-1 px-2 rounded-lg max-w-fit font-bold text-sm">
-                      Tool Call: {toolCall.function.name}
-                    </div>
-                  </div>
-                  <SyntaxHighlighter
-                    language="json"
-                    style={light}
-                    wrapLines
-                    wrapLongLines
-                  >
-                    {toolCall.function.arguments}
-                  </SyntaxHighlighter>
-                </div>
-              ))}
-          </button>
-        )}
-        {/* edit view */}
-        {editing && (
-          <div className="flex flex-col w-full flex-1">
-            {/* simple text content */}
-            {typeof message.content === "string" && (
-              <ResizeableTextarea
-                autoFocus={editing}
-                disabled={!editing}
-                value={message.content}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => {
-                  const newMessage = { ...message, content: e.target.value };
-                  setMessage(newMessage);
-                }}
-                placeholder={`Enter a ${message.role} message here.`}
-                className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 ring ring-slate-400 focus:border-none rounded-lg resize-none overflow-hidden"
-              />
-            )}
+        <div className="flex flex-col w-full flex-1">
+          {/* simple text content */}
+          {typeof message.content === "string" && (
+            <ContentArea
+              role={message.role}
+              value={message.content}
+              onChange={(value) => {
+                const newMessage = { ...message, content: value };
+                setMessage(newMessage);
+              }}
+            />
+          )}
 
-            {/* tools */}
-            {message.role === "assistant" && message.tool_calls && (
-              <ul className="flex flex-col gap-2">
+          {/* tools */}
+          {message.role === "assistant" &&
+            message.tool_calls &&
+            message.tool_calls.length > 0 && (
+              <ul className="flex flex-col gap-4 py-2">
                 {message.tool_calls.map((toolCall, index) => (
-                  <li key={index} className="flex flex-col gap-2">
-                    <button
-                      onClick={() => {
-                        const newMessage = {
-                          ...message,
-                          tool_calls: message.tool_calls?.filter(
-                            (t, idx) => idx !== index
-                          ),
-                        };
-                        setMessage(newMessage);
-                      }}
-                    >
-                      <X className="w-5 h-5 text-slate-4000 hover:text-slate-800" />
-                    </button>
-                    <input
-                      type="text"
-                      className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
-                      value={toolCall.function.name}
-                      onChange={(e) => {
-                        const newMessage = {
-                          ...message,
-                          tool_calls: message.tool_calls?.map((t, idx) =>
-                            idx === index
-                              ? {
-                                  ...t,
-                                  function: {
-                                    ...t.function,
-                                    name: e.target.value,
-                                  },
-                                }
-                              : t
-                          ),
-                        };
-                        setMessage(newMessage);
-                      }}
-                    />
+                  <li
+                    key={index}
+                    className="flex flex-col ring ring-slate-200 rounded-lg group-hover:ring-slate-300 bg-white overflow-hidden focus-within:ring-emerald-600 focus-within:ring-1"
+                  >
+                    <div className="flex justify-between gap-2 bg-gray-200">
+                      <input
+                        type="text"
+                        placeholder="Enter selected tool name here."
+                        className="pl-3 p-1 bg-transparent border-none focus:border-none focus:ring-0 flex-1"
+                        value={toolCall.function.name}
+                        onChange={(e) => {
+                          const newMessage = {
+                            ...message,
+                            tool_calls: message.tool_calls?.map((t, idx) =>
+                              idx === index
+                                ? {
+                                    ...t,
+                                    function: {
+                                      ...t.function,
+                                      name: e.target.value,
+                                    },
+                                  }
+                                : t
+                            ),
+                          };
+                          setMessage(newMessage);
+                        }}
+                      />
+                      <button
+                        title="Delete tool call"
+                        onClick={() => {
+                          const newMessage = {
+                            ...message,
+                            tool_calls: message.tool_calls?.filter(
+                              (t, idx) => idx !== index
+                            ),
+                          };
+                          setMessage(newMessage);
+                        }}
+                        className="p-2"
+                      >
+                        <X className="w-5 h-5 text-slate-400 sm:text-slate-400 hover:text-slate-600 group-hover:text-slate-600" />
+                      </button>
+                    </div>
                     <CodeMirror
                       basicSetup={{
                         lineNumbers: false,
@@ -683,9 +693,9 @@ const ChatMessage = ({
                         highlightActiveLine: false,
                         highlightSelectionMatches: false,
                       }}
-                      className="rounded-lg"
+                      className="rounded-lg p-1 py-2 bg-white border border-transparent bg-transparent text-base"
                       extensions={[json()]}
-                      placeholder="Please enter JS code."
+                      placeholder="Enter selected tool call arguments here."
                       value={toolCall.function.arguments}
                       onChange={(value) => {
                         const newMessage = {
@@ -709,144 +719,153 @@ const ChatMessage = ({
                 ))}
               </ul>
             )}
-            {message.role === "assistant" && (
-              <div className="flex flex-col py-2">
+          {message.role === "assistant" && (
+            <div className="py-1 flex">
+              {!message.content && message.content !== "" && (
                 <button
-                  className="py-1 sm:py-4 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
+                  title="Add text content"
+                  className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
                   onClick={() => {
                     const newMessage = {
                       ...message,
-                      tool_calls: (message.tool_calls || []).concat([
-                        {
-                          id: `tool_call_${message.tool_calls?.length || 0}`,
-                          type: "function",
-                          function: {
-                            name: "",
-                            arguments: "",
-                          },
-                        },
-                      ]),
+                      content: "",
                     };
                     setMessage(newMessage);
                   }}
                 >
-                  <PlusCircle className="w-5 h-5" />
-                  Add tool call
+                  <Type className="w-5 h-5" />
                 </button>
-              </div>
-            )}
+              )}
+              <button
+                title="Add tool call"
+                className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
+                onClick={() => {
+                  const newMessage = {
+                    ...message,
+                    tool_calls: (message.tool_calls || []).concat([
+                      {
+                        id: `tool_call_${message.tool_calls?.length || 0}`,
+                        type: "function",
+                        function: {
+                          name: "",
+                          arguments: "",
+                        },
+                      },
+                    ]),
+                  };
+                  setMessage(newMessage);
+                }}
+              >
+                <Wrench className="w-5 h-5" />
+              </button>
+            </div>
+          )}
 
-            {/* multi-content */}
-            {message.role === "user" &&
-              message.content &&
-              Array.isArray(message.content) && (
-                <ul className="flex flex-col w-full gap-4">
-                  {message.content.map((item, index) => (
-                    <li key={index}>
-                      {item.type === "text" ? (
-                        <ResizeableTextarea
-                          className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 ring ring-slate-400 focus:border-none rounded-lg resize-none overflow-hidden"
-                          autoFocus={editing}
-                          disabled={!editing}
-                          value={item.text}
-                          onChange={(
-                            e: React.ChangeEvent<HTMLTextAreaElement>
-                          ) => {
+          {/* multi-content */}
+          {message.role === "user" &&
+            message.content &&
+            Array.isArray(message.content) && (
+              <ul className="flex flex-col w-full gap-4">
+                {message.content.map((item, index) => (
+                  <li key={index}>
+                    {item.type === "text" ? (
+                      <ContentArea
+                        role={message.role}
+                        value={item.text}
+                        onChange={(value) => {
+                          if (typeof message.content === "string") return;
+                          const newMessage = {
+                            ...message,
+                            content: message.content.map((c, idx) =>
+                              idx === index ? { ...c, text: value } : c
+                            ),
+                          };
+                          setMessage(newMessage);
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <ImageEdit
+                          url={item.image_url.url}
+                          setUrl={(url: string) => {
+                            if (typeof message.content === "string") return;
                             const newMessage = {
                               ...message,
                               content: message.content.map((c, idx) =>
-                                idx === index
-                                  ? {
-                                      ...c,
-                                      text: e.target.value,
-                                    }
-                                  : c
+                                idx === index ? { ...c, image_url: { url } } : c
+                              ),
+                            };
+                            setMessage(newMessage);
+                          }}
+                          deleteImage={() => {
+                            if (typeof message.content === "string") return;
+                            const newMessage = {
+                              ...message,
+                              content: message.content.filter(
+                                (c, idx) => idx !== index
                               ),
                             };
                             setMessage(newMessage);
                           }}
                         />
-                      ) : (
-                        <>
-                          <ImageEdit
-                            url={item.image_url.url}
-                            setUrl={(url: string) => {
-                              const newMessage = {
-                                ...message,
-                                content: message.content.map((c, idx) =>
-                                  idx === index
-                                    ? { ...c, image_url: { url } }
-                                    : c
-                                ),
-                              };
-                              setMessage(newMessage);
-                            }}
-                            deleteImage={() => {
-                              const newMessage = {
-                                ...message,
-                                content: message.content.filter(
-                                  (c, idx) => idx !== index
-                                ),
-                              };
-                              setMessage(newMessage);
-                            }}
-                          />
-                        </>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-            {message.role === "user" && (
-              <div className="flex py-2">
-                <button
-                  className="py-1 sm:py-4 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
-                  onClick={() => {
-                    const newMessage = {
-                      ...message,
-                      content: Array.isArray(message.content)
-                        ? message.content.concat([{ type: "text", text: "" }])
-                        : [
-                            { type: "text", text: message.content },
-                            { type: "text", text: "" },
-                          ],
-                    };
-                    setMessage(newMessage);
-                  }}
-                >
-                  <PlusCircle className="w-5 h-5" />
-                  Add text content
-                </button>
-                <button
-                  className="py-1 sm:py-4 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
-                  onClick={() => {
-                    const newMessage = {
-                      ...message,
-                      content: Array.isArray(message.content)
-                        ? message.content.concat([
-                            {
-                              type: "image_url" as const,
-                              image_url: { url: "" },
-                            },
-                          ])
-                        : [
-                            { type: "text" as const, text: message.content },
-                            {
-                              type: "image_url" as const,
-                              image_url: { url: "" },
-                            },
-                          ],
-                    };
-                    setMessage(newMessage);
-                  }}
-                >
-                  <PlusCircle className="w-5 h-5" />
-                  Add image content
-                </button>
-              </div>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
             )}
-          </div>
-        )}
+          {message.role === "user" && (
+            <div className="flex py-1">
+              {/* <button
+                title="Add text content"
+                className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
+                onClick={() => {
+                  const newMessage = {
+                    ...message,
+                    content: Array.isArray(message.content)
+                      ? message.content.concat([{ type: "text", text: "" }])
+                      : [
+                          { type: "text", text: message.content },
+                          { type: "text", text: "" },
+                        ],
+                  };
+                  setMessage(newMessage as ChatCompletionMessageParam);
+                }}
+              >
+                <Type className="w-5 h-5" />
+              </button> */}
+              {(typeof message.content === "string" ||
+                !message.content.find((c) => c.type === "image_url")) && (
+                  <button
+                    title="Add image content"
+                    className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
+                    onClick={() => {
+                      const newMessage = {
+                        ...message,
+                        content: Array.isArray(message.content)
+                          ? message.content.concat([
+                              {
+                                type: "image_url" as const,
+                                image_url: { url: "" },
+                              },
+                            ])
+                          : [
+                              { type: "text" as const, text: message.content },
+                              {
+                                type: "image_url" as const,
+                                image_url: { url: "" },
+                              },
+                            ],
+                      };
+                      setMessage(newMessage);
+                    }}
+                  >
+                    <Image className="w-5 h-5" />
+                  </button>
+                )}
+            </div>
+          )}
+        </div>
       </span>
       <button onClick={deleteMessage} className="hidden sm:block">
         <MinusCircle className="w-4 h-4 text-transparent group-hover:text-slate-600" />
@@ -935,7 +954,7 @@ const SettingsDialog = ({
                 value={baseURL.value}
                 onChange={(e) => baseURL.setValue(e.target.value)}
                 type="url"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Enter the base URL for the OpenAI API"
               />
             </div>
@@ -951,7 +970,7 @@ const SettingsDialog = ({
                 value={apiKey.value}
                 onChange={(e) => apiKey.setValue(e.target.value)}
                 type="password"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Enter the API key for the OpenAI API"
               />
             </div>
@@ -1055,7 +1074,7 @@ const SamplingSettingsDialog = ({
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 type="text"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Model name"
               />
             </div>
@@ -1071,7 +1090,7 @@ const SamplingSettingsDialog = ({
                 value={seed}
                 onChange={(e) => setSeed(parseInt(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Seed value. Enter -1 for random."
               />
             </div>
@@ -1087,7 +1106,7 @@ const SamplingSettingsDialog = ({
                 value={temperature}
                 onChange={(e) => setTemperature(parseFloat(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-2000"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Sampling temperature. Enter 0 for deterministic decoding."
               />
             </div>
@@ -1103,7 +1122,7 @@ const SamplingSettingsDialog = ({
                 value={topP}
                 onChange={(e) => setTopP(parseFloat(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Enter the top p for the OpenAI API"
               />
             </div>
@@ -1121,7 +1140,7 @@ const SamplingSettingsDialog = ({
                   setFrequencyPenalty(parseFloat(e.target.value))
                 }
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Enter the frequency penalty for the OpenAI API"
               />
             </div>
@@ -1137,7 +1156,7 @@ const SamplingSettingsDialog = ({
                 value={presencePenalty}
                 onChange={(e) => setPresencePenalty(parseFloat(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Enter the presence penalty for the OpenAI API"
               />
             </div>
@@ -1153,7 +1172,7 @@ const SamplingSettingsDialog = ({
                 value={maxTokens}
                 onChange={(e) => setMaxTokens(parseInt(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Maximum number of tokens to generate. Enter -1 for no limit."
               />
             </div>
@@ -1185,7 +1204,7 @@ const SamplingSettingsDialog = ({
                     value={stopSequence}
                     onChange={(e) => setStopSequence(e.target.value)}
                     type="text"
-                    className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                    className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                     placeholder="Stop sequence used to stop generation."
                   />
                   <button
@@ -1201,7 +1220,7 @@ const SamplingSettingsDialog = ({
                 {stop.map((stopSequence, index) => (
                   <div
                     key={index}
-                    className="text-slate-800 bg-slate-200 rounded text-sm"
+                    className="text-slate-800 bg-slate-200 rounded-lg text-sm"
                   >
                     <button
                       onClick={() => {
@@ -1231,7 +1250,7 @@ const SamplingSettingsDialog = ({
                   checked={jsonMode}
                   onChange={(e) => setJsonMode(e.target.checked)}
                   type="checkbox"
-                  className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded border border-slate-200"
+                  className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
                   placeholder="Enter the model for the OpenAI API"
                   id="json-mode"
                 />
@@ -1274,24 +1293,25 @@ const ToolSettingsDialog = ({
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
 }) => {
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [tool, setTool] = useState<{
-    name: string;
-    description: string;
-    parameters: string;
-  }>({ name: "", description: "", parameters: "" });
-  useEffect(() => {
-    if (editIndex !== null) {
-      const selectedTool = tools[editIndex];
-      setTool({
-        name: selectedTool.function.name,
-        description: selectedTool.function.description ?? "",
-        parameters:
-          JSON.stringify(selectedTool.function.parameters, null, 2) ?? "",
-      });
-    }
-  }, [editIndex, tools]);
+  const [currentTools, setCurrentTools] = useState<
+    { name: string; description: string; parameters: string }[]
+  >(
+    tools.map((tool) => ({
+      name: tool.function.name,
+      description: tool.function.description ?? "",
+      parameters: JSON.stringify(tool.function.parameters, null, 2) ?? "",
+    }))
+  );
   const saveToolSettings = () => {
+    const tools_parsed = currentTools.map((tool) => ({
+      type: "function" as const,
+      function: {
+        name: tool.name,
+        description: tool.description,
+        parameters: JSON.parse(tool.parameters),
+      },
+    }));
+    setTools(tools_parsed);
     setSettingsOpen(false);
   };
   return (
@@ -1344,16 +1364,13 @@ const ToolSettingsDialog = ({
                     }
                   }
                 }}
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
               >
                 <option value="auto">Auto</option>
                 <option value="none">None</option>
-                {tools.map((tool) => (
-                  <option
-                    key={tool.function.name}
-                    value={`tool:${tool.function.name}`}
-                  >
-                    Tool: {tool.function.name}
+                {currentTools.map((tool) => (
+                  <option key={tool.name} value={`tool:${tool.name}`}>
+                    Tool: {tool.name}
                   </option>
                 ))}
               </select>
@@ -1362,144 +1379,100 @@ const ToolSettingsDialog = ({
               <label className="text-slate-800 dark:text-slate-400 text-sm font-bold">
                 Tools
               </label>
-              <ul>
-                {tools.map((t, index) => (
+              <ul className="flex flex-col gap-2">
+                {currentTools.map((tool, index) => (
                   <li
                     key={index}
-                    className="focus-within:ring-emerald-600 ring-2 ring-slate-200 rounded-lg p-2"
+                    className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-400 rounded-lg overflow-hidden ring-1"
                   >
-                    {editIndex === index ? (
-                      <div className="flex flex-col relative">
-                        <div className="absolute top-0 right-0 flex gap-2">
-                          <button
-                            onClick={() => {
-                              setEditIndex(null);
-                              setTools(
-                                tools.map((t, i) =>
-                                  i === index
+                    <div className="flex flex-col relative">
+                      <div className="flex flex-col bg-slate-200 p-2">
+                        <div className="flex justify-between">
+                          <input
+                            className="border-none focus:ring-0 focus:border-none bg-transparent font-bold p-0"
+                            value={tool.name}
+                            onChange={(e) => {
+                              setCurrentTools(
+                                currentTools.map((t, index) =>
+                                  index === index
                                     ? {
                                         ...t,
-                                        function: {
-                                          ...t.function,
-                                          name: tool.name,
-                                          description: tool.description,
-                                          parameters: JSON.parse(
-                                            tool.parameters
-                                          ),
-                                        },
+                                        name: e.target.value,
                                       }
                                     : t
                                 )
                               );
                             }}
-                          >
-                            <Check className="w-5 h-5" />
-                          </button>
-                          <button
-                            onClick={() => setEditIndex(null)}
-                            className="focus:outline-none"
-                          >
-                            <X className="w-5 h-5" />
-                          </button>
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="px-2">Name</div>
-                          <input
-                            className="font-bold border-none focus:border-none focus:ring-0 border-b-2 border-slate-200"
-                            value={tool.name}
-                            onChange={(e) =>
-                              setTool({ ...tool, name: e.target.value })
-                            }
                             placeholder="Enter tool name here."
                           />
+                          <button
+                            onClick={() => {
+                              setCurrentTools(
+                                currentTools.filter((_, i) => i !== index)
+                              );
+                            }}
+                            className="p-1 bg-transparent border-none focus:border-none focus:ring-0"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
                         </div>
-                        <div className="flex flex-col">
-                          <div className="px-2">Description</div>
-                          <input
-                            className="border-none focus:border-none focus:ring-0"
-                            value={tool.description}
-                            onChange={(e) =>
-                              setTool({ ...tool, description: e.target.value })
-                            }
-                            placeholder="Enter tool description here."
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <div className="px-2">Parameters</div>
-                          <code className="whitespace-pre-wrap w-full rounded-lg overflow-hidden">
-                            <CodeMirror
-                              basicSetup={{
-                                lineNumbers: false,
-                                foldGutter: false,
-                                highlightActiveLine: false,
-                                highlightSelectionMatches: false,
-                              }}
-                              className="p-4"
-                              extensions={[json()]}
-                              value={tool.parameters}
-                              placeholder="Please enter JS code."
-                              onChange={(value) =>
-                                setTool({ ...tool, parameters: value })
-                              }
-                            />
-                          </code>
-                        </div>
+                        <ResizeableTextarea
+                          className="border-none focus:ring-0 focus:border-none overflow-hidden resize-none bg-transparent p-0"
+                          value={tool.description}
+                          onChange={(
+                            e: React.ChangeEvent<HTMLTextAreaElement>
+                          ) => {
+                            setCurrentTools(
+                              currentTools.map((t, index) =>
+                                index === index
+                                  ? {
+                                      ...t,
+                                      description: e.target.value,
+                                    }
+                                  : t
+                              )
+                            );
+                          }}
+                          placeholder="Enter tool description here."
+                        />
                       </div>
-                    ) : (
-                      <>
-                        <div className="flex flex-col gap-2 relative">
-                          <div className="absolute top-0 right-0 flex gap-2">
-                            <button
-                              onClick={() => setEditIndex(index)}
-                              className="focus:outline-none"
-                            >
-                              <Pencil className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                setTools(tools.filter((_, i) => i !== index));
-                              }}
-                              className="focus:outline-none"
-                            >
-                              <X className="w-5 h-5" />
-                            </button>
-                          </div>
-                          <div>
-                            <div className="font-bold">Name</div>
-                            <div>{t.function.name}</div>
-                          </div>
-                          <div>
-                            <div className="font-bold">Description</div>
-                            <div>{t.function.description}</div>
-                          </div>
-                          <div>
-                            <div className="font-bold">Parameters</div>
-                            <SyntaxHighlighter
-                              language="json"
-                              style={light}
-                              wrapLines
-                              wrapLongLines
-                            >
-                              {JSON.stringify(t.function.parameters, null, 2)}
-                            </SyntaxHighlighter>
-                          </div>
-                        </div>
-                      </>
-                    )}
+                      <div className="flex flex-col">
+                        <code className="whitespace-pre-wrap w-full rounded-lg overflow-hidden">
+                          <CodeMirror
+                            basicSetup={{
+                              lineNumbers: false,
+                              foldGutter: false,
+                              highlightActiveLine: false,
+                              highlightSelectionMatches: false,
+                            }}
+                            className="rounded-lg p-0 bg-white text-base"
+                            extensions={[json()]}
+                            value={tool.parameters}
+                            placeholder="Enter OpenAPI Spec JSON here."
+                            onChange={(value) => {
+                              setCurrentTools(
+                                currentTools.map((t, index) =>
+                                  index === index
+                                    ? { ...t, parameters: value }
+                                    : t
+                                )
+                              );
+                            }}
+                          />
+                        </code>
+                      </div>
+                    </div>
                   </li>
                 ))}
               </ul>
               <button
                 onClick={() =>
-                  setTools([
-                    ...tools,
+                  setCurrentTools([
+                    ...currentTools,
                     {
-                      type: "function" as const,
-                      function: {
-                        name: "",
-                        description: "",
-                        parameters: {},
-                      },
+                      name: "",
+                      description: "",
+                      parameters: "",
                     },
                   ])
                 }
@@ -1514,7 +1487,7 @@ const ToolSettingsDialog = ({
             <button
               className="p-2 px-4 w-full sm:w-auto rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
               onClick={() => {
-                setSettingsOpen(false);
+                saveToolSettings();
               }}
             >
               Save
@@ -1736,6 +1709,9 @@ export default function Home() {
           return null;
         });
       })
+      .catch((error) => {
+        console.error(error);
+      })
       .finally(() => {
         setAbortController(null);
       });
@@ -1753,12 +1729,12 @@ export default function Home() {
       autoFocus
       tabIndex={0}
     >
-      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg overflow-hidden shadow-lg grow max-w-7xl w-full bg-stone-50 dark:bg-slate-900">
+      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg overflow-hidden shadow-lg grow max-w-7xl w-full bg-stone-50 dark:bg-slate-9000">
         <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 sm:border-none flex justify-between items-center sm:items-baseline">
           <div className="flex flex-col">
             <h1 className="text-lg font-bold">Chat Playground</h1>
             <p className="text-slate-500 dark:text-slate-400 hidden sm:block">
-              Test out <code>/v1/chat/completions</code> OpenAI compatible web
+              Test out OpenAI <code>/v1/chat/completions</code> compatible web
               servers.
               <br />
               <span className="inline-flex gap-2">
@@ -1784,7 +1760,7 @@ export default function Home() {
               className="focus:outline-none"
               title="Tools"
             >
-              <Hammer className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+              <Wrench className="w-5 h-5 text-slate-500 hover:text-slate-800" />
             </button>
             <button
               onClick={() => setSamplingSettingsOpen(!samplingSettingsOpen)}
@@ -1802,30 +1778,6 @@ export default function Home() {
             </button>
           </div>
         </div>
-        {settingsOpen && (
-          <SettingsDialog
-            settingsOpen={settingsOpen}
-            setSettingsOpen={setSettingsOpen}
-          />
-        )}
-        {samplingSettingsOpen && (
-          <SamplingSettingsDialog
-            settingsOpen={samplingSettingsOpen}
-            setSettingsOpen={setSamplingSettingsOpen}
-            settings={settings}
-            setSettings={setSettings}
-          />
-        )}
-        {toolSettingsOpen && (
-          <ToolSettingsDialog
-            tools={tools}
-            setTools={setTools}
-            toolChoice={toolChoice}
-            setToolChoice={setToolChoice}
-            settingsOpen={toolSettingsOpen}
-            setSettingsOpen={setToolSettingsOpen}
-          />
-        )}
         <div className="w-full h-full flex flex-col items-start gap-2 pb-4 overflow-y-auto relative">
           <div
             className="w-full h-full flex flex-col items-start gap-2 pb-4 overflow-y-auto"
@@ -1880,6 +1832,7 @@ export default function Home() {
             </div>
           )}
         </div>
+        {/* section: send button, stop button, tool choice, completion metrics */}
         <div className="w-full px-0 sm:px-4 pt-2 border-t border-slate-200 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
           {abortController && (
             <button
@@ -1985,6 +1938,30 @@ export default function Home() {
           )}
         </div>
       </div>
+      {settingsOpen && (
+        <SettingsDialog
+          settingsOpen={settingsOpen}
+          setSettingsOpen={setSettingsOpen}
+        />
+      )}
+      {samplingSettingsOpen && (
+        <SamplingSettingsDialog
+          settingsOpen={samplingSettingsOpen}
+          setSettingsOpen={setSamplingSettingsOpen}
+          settings={settings}
+          setSettings={setSettings}
+        />
+      )}
+      {toolSettingsOpen && (
+        <ToolSettingsDialog
+          tools={tools}
+          setTools={setTools}
+          toolChoice={toolChoice}
+          setToolChoice={setToolChoice}
+          settingsOpen={toolSettingsOpen}
+          setSettingsOpen={setToolSettingsOpen}
+        />
+      )}
     </div>
   );
 }

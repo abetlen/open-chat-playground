@@ -101,3 +101,6 @@ html, body {
   width: 100%;
   max-height: 100dvh;
 }
+
+/* CodeMirror disable focus outline */
+.cm-focused { outline: none !important; }
