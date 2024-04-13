@@ -437,13 +437,14 @@ const ContentArea = ({
           onClick={() => {
             setEditing(true);
           }}
-          className="text-left flex flex-col p-1 px-2 sm:p-2 w-full group-hover:bg-white rounded-lg cursor-text"
+          className="text-left p-1 px-2 sm:p-2 group-hover:bg-white rounded-lg cursor-text"
         >
           {value ? (
             <Markdown
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeKatex]}
               components={reactMarkdownComponents}
+              className="whitespace-pre-wrap break-all"
             >
               {value}
             </Markdown>
