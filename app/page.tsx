@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import {
   MinusCircle,
@@ -1006,19 +1006,29 @@ const SamplingSettingsDialog = ({
   setSettingsOpen: (settingsOpen: boolean) => void;
 }) => {
   const [model, setModel] = useState(settings.model);
+  const modelId = useId();
   const [seed, setSeed] = useState(settings.seed);
+  const seedId = useId();
   const [temperature, setTemperature] = useState(settings.temperature);
+  const temperatureId = useId();
   const [maxTokens, setMaxTokens] = useState(settings.maxTokens);
+  const maxTokensId = useId();
   const [topP, setTopP] = useState(settings.topP);
+  const topPId = useId();
   const [presencePenalty, setPresencePenalty] = useState(
     settings.presencePenalty
   );
+  const presencePenaltyId = useId();
   const [frequencyPenalty, setFrequencyPenalty] = useState(
     settings.frequencyPenalty
   );
+  const frequencyPenaltyId = useId();
   const [jsonMode, setJsonMode] = useState(settings.jsonMode);
+  const jsonModeId = useId();
   const [stopSequence, setStopSequence] = useState<string>("");
+  const stopSequenceId = useId();
   const [stop, setStop] = useState<string[]>(settings.stop);
+  const stopId = useId();
 
   const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -1067,12 +1077,13 @@ const SamplingSettingsDialog = ({
             {/* model */}
             <div className="w-ful">
               <label
-                htmlFor="model"
+                htmlFor={modelId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Model
               </label>
               <input
+                id={modelId}
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
                 type="text"
@@ -1083,12 +1094,13 @@ const SamplingSettingsDialog = ({
             {/* seed */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor="seed"
+                htmlFor={seedId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Seed
               </label>
               <input
+                id={seedId}
                 value={seed}
                 onChange={(e) => setSeed(parseInt(e.target.value))}
                 type="number"
@@ -1099,12 +1111,13 @@ const SamplingSettingsDialog = ({
             {/* temperature */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor="temperature"
+                htmlFor={temperatureId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Temperature
               </label>
               <input
+                id={temperatureId}
                 value={temperature}
                 onChange={(e) => setTemperature(parseFloat(e.target.value))}
                 type="number"
@@ -1115,12 +1128,13 @@ const SamplingSettingsDialog = ({
             {/* Top P */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor="top-p"
+                htmlFor={topPId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Top P
               </label>
               <input
+                id={topPId}
                 value={topP}
                 onChange={(e) => setTopP(parseFloat(e.target.value))}
                 type="number"
@@ -1131,12 +1145,13 @@ const SamplingSettingsDialog = ({
             {/* Frequency Penalty */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor="frequency-penalty"
+                htmlFor={frequencyPenaltyId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Frequency Penalty
               </label>
               <input
+                id={frequencyPenaltyId}
                 value={frequencyPenalty}
                 onChange={(e) =>
                   setFrequencyPenalty(parseFloat(e.target.value))
@@ -1149,12 +1164,13 @@ const SamplingSettingsDialog = ({
             {/* Presence Penalty */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor="presence-penalty"
+                htmlFor={presencePenaltyId}
                 className="text-slate-800 dark:text-slate-4000 text-sm font-bold"
               >
                 Presence Penalty
               </label>
               <input
+                id={presencePenaltyId}
                 value={presencePenalty}
                 onChange={(e) => setPresencePenalty(parseFloat(e.target.value))}
                 type="number"
@@ -1165,12 +1181,13 @@ const SamplingSettingsDialog = ({
             {/* max tokens */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor="max-tokens"
+                htmlFor={maxTokensId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Max Tokens
               </label>
               <input
+                id={maxTokensId}
                 value={maxTokens}
                 onChange={(e) => setMaxTokens(parseInt(e.target.value))}
                 type="number"
@@ -1181,13 +1198,14 @@ const SamplingSettingsDialog = ({
             {/* stop */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor="stop"
+                htmlFor={stopId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Stop Sequences
               </label>
               <div className="flex">
                 <form
+                  id={stopId}
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (stopSequence === "") {
@@ -1242,21 +1260,21 @@ const SamplingSettingsDialog = ({
             {/* JSON Mode */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor="json-mode"
+                htmlFor={jsonModeId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 JSON Mode
               </label>
               <div className="flex items-center gap-2">
                 <input
+                  id={jsonModeId}
                   checked={jsonMode}
                   onChange={(e) => setJsonMode(e.target.checked)}
                   type="checkbox"
                   className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
                   placeholder="Enter the model for the OpenAI API"
-                  id="json-mode"
                 />
-                <label htmlFor="json-mode" className="text-sm">
+                <label htmlFor={jsonModeId} className="text-sm">
                   Enabled
                 </label>
               </div>
