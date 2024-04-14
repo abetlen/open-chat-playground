@@ -390,10 +390,6 @@ const ResizeableTextarea = (props: any) => {
   useEffect(() => {
     if (textAreaRef.current && props.autoFocus) {
       textAreaRef.current.focus();
-      textAreaRef.current.setSelectionRange(
-        textAreaRef.current.value.length,
-        textAreaRef.current.value.length
-      );
     }
   }, [textAreaRef, props.autoFocus]);
   useEffect(() => {
@@ -957,7 +953,7 @@ const SettingsDialog = ({
                 onChange={(e) => baseURL.setValue(e.target.value)}
                 type="url"
                 className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
-                placeholder="Enter the base URL for the OpenAI API"
+                placeholder="Enter the base URL for the server or leave blank for OpenAI"
               />
             </div>
             {/* api key */}
@@ -1738,7 +1734,7 @@ export default function Home() {
   };
   return (
     <div
-      className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-24 bg-stone-200 dark:bg-slate-800 relative"
+      className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-24 bg-stone-200 dark:bg-slate-800 relative overflow-hidden"
       onKeyDown={(e) => {
         // ctr+enter sends message
         if (e.key === "Enter" && e.ctrlKey) {
@@ -1749,7 +1745,7 @@ export default function Home() {
       autoFocus
       tabIndex={0}
     >
-      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-7xl w-full bg-stone-50 dark:bg-slate-9000">
+      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-7xl w-full bg-stone-50 overflow-hidden">
         <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 sm:border-none flex justify-between items-center sm:items-baseline">
           <div className="flex flex-col">
             <h1 className="text-lg font-bold">Chat Playground</h1>
