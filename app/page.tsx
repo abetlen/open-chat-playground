@@ -426,7 +426,7 @@ const ContentArea = ({
             onChange(e.target.value);
           }}
           placeholder={`Enter a ${role} message here.`}
-          className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 border-none outline-none focus:border-none rounded-lg resize-none overflow-hidden group-hover:bg-white focus:bg-white bg-transparent"
+          className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 border-none outline-none focus:border-none rounded-lg resize-none group-hover:bg-white focus:bg-white bg-transparent"
           autoFocus
           onBlur={() => {
             setEditing(false);
@@ -623,7 +623,7 @@ const ChatMessage = ({
           <MinusCircle className="w-5 h-5 text-slate-400" />
         </button>
       </div>
-      <span className="flex-1 overflow-x-auto w-full sm:w-auto h-full flex flex-col min-h-fit items-start">
+      <span className="flex-1 w-full sm:w-auto h-full flex flex-col min-h-fit items-start">
         <div className="flex flex-col w-full flex-1">
           {/* simple text content */}
           {typeof message.content === "string" && (
@@ -645,7 +645,7 @@ const ChatMessage = ({
                 {message.tool_calls.map((toolCall, index) => (
                   <li
                     key={index}
-                    className="flex flex-col ring ring-slate-200 rounded-lg group-hover:ring-slate-300 bg-white overflow-hidden focus-within:ring-emerald-600 focus-within:ring-1"
+                    className="flex flex-col ring ring-slate-200 rounded-lg group-hover:ring-slate-300 bg-white focus-within:ring-emerald-600 focus-within:ring-1"
                   >
                     <div className="flex justify-between gap-2 bg-gray-200">
                       <input
@@ -1385,7 +1385,7 @@ const ToolSettingsDialog = ({
                 {currentTools.map((tool, index) => (
                   <li
                     key={index}
-                    className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-400 rounded-lg overflow-hidden ring-1"
+                    className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-400 rounded-lg ring-1"
                   >
                     <div className="flex flex-col relative">
                       <div className="flex flex-col bg-slate-200 p-2">
@@ -1419,7 +1419,7 @@ const ToolSettingsDialog = ({
                           </button>
                         </div>
                         <ResizeableTextarea
-                          className="border-none focus:ring-0 focus:border-none overflow-hidden resize-none bg-transparent p-0"
+                          className="border-none focus:ring-0 focus:border-none resize-none bg-transparent p-0"
                           value={tool.description}
                           onChange={(
                             e: React.ChangeEvent<HTMLTextAreaElement>
@@ -1439,7 +1439,7 @@ const ToolSettingsDialog = ({
                         />
                       </div>
                       <div className="flex flex-col">
-                        <code className="whitespace-pre-wrap w-full rounded-lg overflow-hidden">
+                        <code className="whitespace-pre-wrap w-full rounded-lg">
                           <CodeMirror
                             basicSetup={{
                               lineNumbers: false,
@@ -1731,7 +1731,7 @@ export default function Home() {
       autoFocus
       tabIndex={0}
     >
-      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg overflow-hidden shadow-lg grow max-w-7xl w-full bg-stone-50 dark:bg-slate-9000">
+      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-7xl w-full bg-stone-50 dark:bg-slate-9000">
         <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 sm:border-none flex justify-between items-center sm:items-baseline">
           <div className="flex flex-col">
             <h1 className="text-lg font-bold">Chat Playground</h1>
