@@ -832,7 +832,7 @@ const ChatMessage = ({
                 <Type className="w-5 h-5" />
               </button> */}
               {(typeof message.content === "string" ||
-                !message.content.find((c) => c.type === "image_url")) && (
+                !(Array.isArray(message.content) && message.content.find((c) => c.type === "image_url"))) && (
                 <button
                   title="Add image content"
                   className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
