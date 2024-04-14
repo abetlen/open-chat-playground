@@ -602,7 +602,7 @@ const ChatMessage = ({
       ref={rootRef}
       className="flex flex-col sm:flex-row w-full gap-1 sm:gap-2 group hover:bg-slate-200 p-1 py-2 sm:p-4 rounded-lg items-baseline grow flex-1"
     >
-      <div className="w-28 flex justify-between pr-1">
+      <div className="w-full sm:w-28 flex justify-between pr-1">
         <button
           onClick={() => {
             const newMessage = { ...message };
