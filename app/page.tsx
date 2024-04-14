@@ -623,7 +623,7 @@ const ChatMessage = ({
           <MinusCircle className="w-5 h-5 text-slate-400" />
         </button>
       </div>
-      <span className="flex-1 w-full sm:w-auto h-full flex flex-col min-h-fit items-start">
+      <span className="flex-1 w-full sm:w-auto h-full min-h-fit overflow-x-auto p-1">
         <div className="flex flex-col w-full flex-1">
           {/* simple text content */}
           {typeof message.content === "string" && (
@@ -645,7 +645,7 @@ const ChatMessage = ({
                 {message.tool_calls.map((toolCall, index) => (
                   <li
                     key={index}
-                    className="flex flex-col ring ring-slate-200 rounded-lg group-hover:ring-slate-300 bg-white focus-within:ring-emerald-600 focus-within:ring-1"
+                    className="flex flex-col ring ring-slate-200 rounded-lg group-hover:ring-slate-300 bg-white focus-within:ring-emerald-600 focus-within:ring-1 overflow-hidden"
                   >
                     <div className="flex justify-between gap-2 bg-gray-200">
                       <input
@@ -694,7 +694,7 @@ const ChatMessage = ({
                         highlightActiveLine: false,
                         highlightSelectionMatches: false,
                       }}
-                      className="rounded-lg p-1 py-2 bg-white border border-transparent bg-transparent text-base"
+                      className="p-1 py-2 bg-white border border-transparent bg-transparent text-base"
                       extensions={[json()]}
                       placeholder="Enter selected tool call arguments here."
                       value={toolCall.function.arguments}
@@ -1403,13 +1403,13 @@ const ToolSettingsDialog = ({
                 {currentTools.map((tool, index) => (
                   <li
                     key={index}
-                    className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-400 rounded-lg ring-1"
+                    className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-400 rounded-lg ring-1 overflow-hidden"
                   >
                     <div className="flex flex-col relative">
                       <div className="flex flex-col bg-slate-200 p-2">
                         <div className="flex justify-between">
                           <input
-                            className="border-none focus:ring-0 focus:border-none bg-transparent font-bold p-0"
+                            className="border-none focus:ring-0 focus:border-none bg-transparent font-bold p-0 flex-1"
                             value={tool.name}
                             onChange={(e) => {
                               setCurrentTools(
@@ -1894,7 +1894,7 @@ export default function Home() {
                   }
                 }
               }}
-              className="min-w-[10rem] p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+              className="w-auto min-w-[14rem] p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
             >
               <option value="auto">Auto</option>
               <option value="none">None</option>
