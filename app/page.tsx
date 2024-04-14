@@ -440,7 +440,7 @@ const ContentArea = ({
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeKatex]}
               components={reactMarkdownComponents}
-              className="whitespace-pre-wrap break-all"
+              className="whitespace-pre-wrap overflow-x-auto"
             >
               {value}
             </Markdown>
