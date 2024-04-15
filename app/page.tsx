@@ -1511,6 +1511,51 @@ const ToolSettingsDialog = ({
   );
 };
 
+const ShowScrollToBottom = ({
+  elementRef,
+  children,
+  deps
+}: {
+  elementRef: React.RefObject<HTMLElement>;
+  children: React.ReactNode;
+  deps?: any[];
+}) => {
+  const [showScrollButton, setShowScrollButton] = useState(false);
+  useEffect(() => {
+    const checkScroll = () => {
+      if (!elementRef.current) {
+        return;
+      }
+      const distanceToBottom =
+        elementRef.current.scrollHeight -
+        elementRef.current.scrollTop -
+        elementRef.current.clientHeight;
+      const isAtBottom = distanceToBottom <= 1;
+      const hasScrollBar = elementRef.current.scrollHeight > elementRef.current.clientHeight;
+      // show scroll button
+      setShowScrollButton(hasScrollBar && !isAtBottom);
+    };
+    checkScroll();
+    const container = elementRef.current;
+    if (!container) {
+      return;
+    }
+    // scroll events
+    container.addEventListener("scroll", () => {
+      checkScroll();
+    });
+    // resize events
+    container.addEventListener("resize", checkScroll);
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      container.removeEventListener("scroll", checkScroll);
+      container.removeEventListener("resize", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [elementRef, deps]);
+  return showScrollButton ? <>{children}</> : null;
+};
+
 export default function Home() {
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [tools, setTools] = useState<ChatCompletionTool[]>(INITIAL_TOOLS);
@@ -1529,41 +1574,8 @@ export default function Home() {
     latestTokenTime: number | null;
     nTokens: number | null;
   } | null>(null);
-  const [showScrollButton, setShowScrollButton] = useState(false);
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const messagesContainerBottomRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    const checkScroll = () => {
-      if (!messageContainerRef.current) {
-        return;
-      }
-      const distanceToBottom =
-        messageContainerRef.current.scrollHeight -
-        messageContainerRef.current.scrollTop -
-        messageContainerRef.current.clientHeight;
-      const isAtBottom = distanceToBottom <= 1;
-      const hasScrollBar =
-        messageContainerRef.current.scrollHeight >
-        messageContainerRef.current.clientHeight;
-      // show scroll button
-      setShowScrollButton(hasScrollBar && !isAtBottom);
-    };
-    checkScroll();
-    const messageContainer = messageContainerRef.current;
-    if (!messageContainer) {
-      return;
-    }
-    // scroll events
-    messageContainer.addEventListener("scroll", () => {
-      checkScroll();
-    });
-    // resize events
-    window.addEventListener("resize", checkScroll);
-    return () => {
-      messageContainer.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
-    };
-  }, [messages]);
   const deleteMessage = (index: number) => {
     const newMessages = [...messages];
     newMessages.splice(index, 1);
@@ -1822,7 +1834,7 @@ export default function Home() {
               Add message
             </button>
           </div>
-          {showScrollButton && (
+          <ShowScrollToBottom elementRef={messageContainerRef} deps={[messages]}>
             <div className="bottom-0 left-0 right-0 w-full absolute flex items-center justify-center pb-2">
               <button
                 className="px-2 py-2 w-auto rounded-full bg-white hover:bg-slate-100 text-slate-800 font-bold focus:outline-none border border-slate-200 shadow flex"
@@ -1835,7 +1847,21 @@ export default function Home() {
                 <ArrowDown />
               </button>
             </div>
-          )}
+          </ShowScrollToBottom>
+          {/* {showScrollButton && (
+            <div className="bottom-0 left-0 right-0 w-full absolute flex items-center justify-center pb-2">
+              <button
+                className="px-2 py-2 w-auto rounded-full bg-white hover:bg-slate-100 text-slate-800 font-bold focus:outline-none border border-slate-200 shadow flex"
+                onClick={() => {
+                  messagesContainerBottomRef.current?.scrollIntoView({
+                    behavior: "instant",
+                  });
+                }}
+              >
+                <ArrowDown />
+              </button>
+            </div>
+          )} */}
         </div>
         {/* section: send button, stop button, tool choice, completion metrics */}
         <div className="w-full px-0 sm:px-4 pt-2 border-t border-slate-200 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
