@@ -583,14 +583,10 @@ const ChatMessage = ({
   message,
   setMessage,
   deleteMessage,
-  editing,
-  setEditing,
 }: {
   message: ChatCompletionMessageParam;
   setMessage: (message: ChatCompletionMessageParam) => void;
   deleteMessage: () => void;
-  editing: boolean;
-  setEditing: (editing: boolean) => void;
 }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
   return (
@@ -1526,7 +1522,6 @@ export default function Home() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [samplingSettingsOpen, setSamplingSettingsOpen] = useState(false);
   const [toolSettingsOpen, setToolSettingsOpen] = useState(false);
-  const [editIndex, setEditIndex] = useState<number | null>(null);
   const [completionMetrics, setCompletionMetrics] = useState<{
     startTime: number;
     endTime: number | null;
@@ -1578,7 +1573,6 @@ export default function Home() {
     setMessages((messages) => {
       const newMessages = [...messages];
       newMessages.push({ role: "user", content: "" });
-      setEditIndex(newMessages.length - 1);
       return newMessages;
     });
   };
@@ -1739,7 +1733,6 @@ export default function Home() {
         // ctr+enter sends message
         if (e.key === "Enter" && e.ctrlKey) {
           sendMessage();
-          setEditIndex(null);
         }
       }}
       autoFocus
@@ -1814,10 +1807,6 @@ export default function Home() {
                       }}
                       deleteMessage={() => {
                         deleteMessage(index);
-                      }}
-                      editing={editIndex === index}
-                      setEditing={(editing: boolean) => {
-                        setEditIndex(editing ? index : null);
                       }}
                     />
                   </li>
