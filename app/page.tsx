@@ -1750,7 +1750,7 @@ export default function Home() {
   };
   return (
     <div
-      className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-24 bg-stone-200 dark:bg-slate-800 relative overflow-hidden"
+      className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-4 bg-stone-200 dark:bg-slate-800 relative overflow-hidden"
       onKeyDown={(e) => {
         // ctr+enter sends message
         if (e.key === "Enter" && e.ctrlKey) {
