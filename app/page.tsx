@@ -41,6 +41,7 @@ import {
   ChatCompletionTool,
   ChatCompletionToolChoiceOption,
 } from "openai/resources/chat/index";
+import React from "react";
 
 const createChatCompletion = (
   messages: ChatCompletionMessageParam[],
@@ -358,15 +359,6 @@ const useLocalStorage = <T,>({
   return { value, setValue, save, reset, reload };
 };
 
-const useLocalStorageBoolean = (key: string, initialValue: boolean) => {
-  return useLocalStorage({
-    key,
-    initialValue,
-    serialize: (value) => value.toString(),
-    deserialize: (value) => value === "true",
-  });
-};
-
 const useLocalStorageString = (key: string, initialValue: string) => {
   return useLocalStorage({
     key,
@@ -376,14 +368,47 @@ const useLocalStorageString = (key: string, initialValue: string) => {
   });
 };
 
-const useLocalStorageNumber = (key: string, initialValue: number) => {
-  return useLocalStorage({
-    key,
-    initialValue,
-    serialize: (value) => value.toString(),
-    deserialize: (value) => parseFloat(value),
-  });
-};
+interface ErrorBoundaryProps {
+  fallback: React.ReactNode;
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(_: Error): ErrorBoundaryState {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    // Example "componentStack":
+    //   in ComponentThatThrows (created by App)
+    //   in ErrorBoundary (created by App)
+    //   in div (created by App)
+    //   in App
+    console.error(error, info.componentStack);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // You can render any custom fallback UI
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
 
 const ResizeableTextarea = (props: any) => {
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -828,7 +853,10 @@ const ChatMessage = ({
                 <Type className="w-5 h-5" />
               </button> */}
               {(typeof message.content === "string" ||
-                !(Array.isArray(message.content) && message.content.find((c) => c.type === "image_url"))) && (
+                !(
+                  Array.isArray(message.content) &&
+                  message.content.find((c) => c.type === "image_url")
+                )) && (
                 <button
                   title="Add image content"
                   className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
@@ -1530,7 +1558,7 @@ const ShowScrollToBottom = ({
         elementRef.current.scrollHeight -
         elementRef.current.scrollTop -
         elementRef.current.clientHeight;
-      const isAtBottom = distanceToBottom <= 1;
+      const isAtBottom = distanceToBottom <= 5;
       const hasScrollBar = elementRef.current.scrollHeight > elementRef.current.clientHeight;
       // show scroll button
       setShowScrollButton(hasScrollBar && !isAtBottom);
