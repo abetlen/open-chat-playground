@@ -834,24 +834,6 @@ const ChatMessage = ({
             )}
           {message.role === "user" && (
             <div className="flex py-1">
-              {/* <button
-                title="Add text content"
-                className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
-                onClick={() => {
-                  const newMessage = {
-                    ...message,
-                    content: Array.isArray(message.content)
-                      ? message.content.concat([{ type: "text", text: "" }])
-                      : [
-                          { type: "text", text: message.content },
-                          { type: "text", text: "" },
-                        ],
-                  };
-                  setMessage(newMessage as ChatCompletionMessageParam);
-                }}
-              >
-                <Type className="w-5 h-5" />
-              </button> */}
               {(typeof message.content === "string" ||
                 !(
                   Array.isArray(message.content) &&
@@ -1876,20 +1858,6 @@ export default function Home() {
               </button>
             </div>
           </ShowScrollToBottom>
-          {/* {showScrollButton && (
-            <div className="bottom-0 left-0 right-0 w-full absolute flex items-center justify-center pb-2">
-              <button
-                className="px-2 py-2 w-auto rounded-full bg-white hover:bg-slate-100 text-slate-800 font-bold focus:outline-none border border-slate-200 shadow flex"
-                onClick={() => {
-                  messagesContainerBottomRef.current?.scrollIntoView({
-                    behavior: "instant",
-                  });
-                }}
-              >
-                <ArrowDown />
-              </button>
-            </div>
-          )} */}
         </div>
         {/* section: send button, stop button, tool choice, completion metrics */}
         <div className="w-full px-0 sm:px-4 pt-2 border-t border-slate-200 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
