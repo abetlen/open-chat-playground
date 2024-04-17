@@ -1068,8 +1068,8 @@ const SamplingSettings = ({
   };
 
   return (
-    <div className="w-full h-full p-4 gap-2 flex flex-col max-h-dvh">
-      <div>
+    <div className="w-full h-full p-4 gap-2 flex flex-col">
+      <div className="flex-auto">
         <div className="flex justify-between">
           <div className="font-bold text-lg">Parameters</div>
         </div>
@@ -1077,7 +1077,7 @@ const SamplingSettings = ({
           Configure parameters for chat completion requests.
         </p>
       </div>
-      <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2">
+      <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2 flex-1">
         {/* model */}
         <div className="w-ful">
           <label
@@ -1303,7 +1303,7 @@ const SamplingSettings = ({
           </div>
         </div>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-auto">
         <button
           className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 disabled:text-slate-800 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
           onClick={() => {
@@ -2532,7 +2532,7 @@ export default function Home() {
               </div>
             </ShowScrollToBottom>
           </div>
-          <div className="hidden lg:flex flex-col h-full w-full max-w-md">
+          <div className="hidden lg:flex flex-col h-full w-full max-w-md overflow-y-auto">
             <Tab.Group>
               <span className="px-2 flex w-full">
                 <Tab.List className="bg-slate-200 p-1 rounded-lg font-bold flex w-full">
