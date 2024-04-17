@@ -20,7 +20,7 @@ import {
   Paperclip,
 } from "lucide-react";
 
-import { Dialog } from "@headlessui/react";
+import { Dialog, Tab } from "@headlessui/react";
 
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -40,8 +40,11 @@ import {
   ChatCompletionMessageParam,
   ChatCompletionTool,
   ChatCompletionToolChoiceOption,
+  ChatCompletionChunk,
+  ChatCompletion,
 } from "openai/resources/chat/index";
 import React from "react";
+import { Stream } from "openai/streaming.mjs";
 
 const createChatCompletion = (
   messages: ChatCompletionMessageParam[],
@@ -60,6 +63,7 @@ const createChatCompletion = (
   const presencePenalty = settings.presencePenalty;
   const stop = settings.stop;
   const jsonMode = settings.jsonMode;
+  const stream = settings.stream;
   const openai = new OpenAI({
     baseURL: baseURL === "" ? undefined : baseURL,
     apiKey: apiKey,
@@ -78,7 +82,7 @@ const createChatCompletion = (
       stop: stop.length > 0 ? stop : undefined,
       frequency_penalty: frequencyPenalty,
       presence_penalty: presencePenalty,
-      stream: true,
+      stream,
       response_format: jsonMode ? { type: "json_object" } : undefined,
     },
     {
@@ -204,6 +208,7 @@ type Settings = {
   maxTokens: number;
   stop: string[];
   jsonMode: boolean;
+  stream: boolean;
 };
 
 const INITIAL_SETTINGS: Settings = {
@@ -216,6 +221,7 @@ const INITIAL_SETTINGS: Settings = {
   maxTokens: -1,
   stop: [],
   jsonMode: false,
+  stream: false,
 };
 
 const INITIAL_TOOLS: ChatCompletionTool[] = [
@@ -996,6 +1002,360 @@ const SettingsDialog = ({
   );
 };
 
+const SamplingSettings = ({
+  settings,
+  setSettings,
+}: {
+  settings: Settings;
+  setSettings: (settings: Settings) => void;
+}) => {
+  const [model, setModel] = useState(settings.model);
+  const modelId = useId();
+  const [seed, setSeed] = useState(settings.seed);
+  const seedId = useId();
+  const [temperature, setTemperature] = useState(settings.temperature);
+  const temperatureId = useId();
+  const [maxTokens, setMaxTokens] = useState(settings.maxTokens);
+  const maxTokensId = useId();
+  const [topP, setTopP] = useState(settings.topP);
+  const topPId = useId();
+  const [presencePenalty, setPresencePenalty] = useState(
+    settings.presencePenalty
+  );
+  const presencePenaltyId = useId();
+  const [frequencyPenalty, setFrequencyPenalty] = useState(
+    settings.frequencyPenalty
+  );
+  const frequencyPenaltyId = useId();
+  const [jsonMode, setJsonMode] = useState(settings.jsonMode);
+  const jsonModeId = useId();
+  const [stopSequence, setStopSequence] = useState<string>("");
+  const stopSequenceId = useId();
+  const [stop, setStop] = useState<string[]>(settings.stop);
+  const stopId = useId();
+  const [stream, setStream] = useState(settings.stream);
+  const streamId = useId();
+
+  const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const save = () => {
+    const newSettings = {
+      model,
+      seed,
+      temperature,
+      maxTokens,
+      topP,
+      presencePenalty,
+      frequencyPenalty,
+      jsonMode,
+      stop,
+      stream,
+    };
+    setSettings(newSettings);
+  };
+
+  const reset = () => {
+    setModel(settings.model);
+    setSeed(settings.seed);
+    setTemperature(settings.temperature);
+    setMaxTokens(settings.maxTokens);
+    setTopP(settings.topP);
+    setPresencePenalty(settings.presencePenalty);
+    setFrequencyPenalty(settings.frequencyPenalty);
+    setJsonMode(settings.jsonMode);
+    setStop(settings.stop);
+    setStream(settings.stream);
+  };
+
+  return (
+    <div className="w-full h-full p-4 gap-2 flex flex-col max-h-dvh">
+      <div>
+        <div className="flex justify-between">
+          <div className="font-bold text-lg">Parameters</div>
+        </div>
+        <p className="text-slate-500">
+          Configure parameters for chat completion requests.
+        </p>
+      </div>
+      <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2">
+        {/* model */}
+        <div className="w-ful">
+          <label
+            htmlFor={modelId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Model
+          </label>
+          <input
+            id={modelId}
+            value={model}
+            onChange={(e) => setModel(e.target.value)}
+            type="text"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            placeholder="Model name"
+          />
+        </div>
+        {/* seed */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={seedId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Seed
+          </label>
+          <input
+            id={seedId}
+            value={seed}
+            onChange={(e) => setSeed(parseInt(e.target.value))}
+            type="number"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            placeholder="Seed value. Enter -1 for random."
+          />
+        </div>
+        {/* temperature */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={temperatureId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Temperature
+          </label>
+          <input
+            id={temperatureId}
+            value={temperature}
+            onChange={(e) => setTemperature(parseFloat(e.target.value))}
+            type="number"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            placeholder="Sampling temperature. Enter 0 for deterministic decoding."
+          />
+        </div>
+        {/* Top P */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={topPId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Top P
+          </label>
+          <input
+            id={topPId}
+            value={topP}
+            onChange={(e) => setTopP(parseFloat(e.target.value))}
+            type="number"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            placeholder="Enter the top p for the OpenAI API"
+          />
+        </div>
+        {/* Frequency Penalty */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={frequencyPenaltyId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Frequency Penalty
+          </label>
+          <input
+            id={frequencyPenaltyId}
+            value={frequencyPenalty}
+            onChange={(e) => setFrequencyPenalty(parseFloat(e.target.value))}
+            type="number"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            placeholder="Enter the frequency penalty for the OpenAI API"
+          />
+        </div>
+        {/* Presence Penalty */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={presencePenaltyId}
+            className="text-slate-800 dark:text-slate-4000 text-sm font-bold"
+          >
+            Presence Penalty
+          </label>
+          <input
+            id={presencePenaltyId}
+            value={presencePenalty}
+            onChange={(e) => setPresencePenalty(parseFloat(e.target.value))}
+            type="number"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            placeholder="Enter the presence penalty for the OpenAI API"
+          />
+        </div>
+        {/* max tokens */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={maxTokensId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Max Tokens
+          </label>
+          <input
+            id={maxTokensId}
+            value={maxTokens}
+            onChange={(e) => setMaxTokens(parseInt(e.target.value))}
+            type="number"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            placeholder="Maximum number of tokens to generate. Enter -1 for no limit."
+          />
+        </div>
+        {/* stop */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={stopId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Stop Sequences
+          </label>
+          <div className="flex">
+            <form
+              id={stopId}
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (stopSequence === "") {
+                  return;
+                }
+                // check if stopSequence already in stop
+                if (stop.includes(stopSequence)) {
+                  return;
+                }
+                setStop([...stop, stopSequence]);
+                setStopSequence("");
+              }}
+              className="flex w-full gap-2"
+            >
+              <input
+                value={stopSequence}
+                onChange={(e) => setStopSequence(e.target.value)}
+                type="text"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                placeholder="Stop sequence used to stop generation."
+              />
+              <button
+                type="submit"
+                disabled={stopSequence === ""}
+                className="p-1 sm:p-2 focus:outline-none focus:ring-none rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 disabled:bg-slate-100"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            </form>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {stop.map((stopSequence, index) => (
+              <div
+                key={index}
+                className="text-slate-800 bg-slate-200 rounded-lg text-sm"
+              >
+                <button
+                  onClick={() => {
+                    if (stop) {
+                      setStop(stop.filter((_, i) => i !== index));
+                    }
+                  }}
+                  className="p-1 sm:p-2 focus:ring-none rounded-lg border border-none focus:border-none flex items-center gap-1 hover:text-slate-900"
+                >
+                  {stopSequence}
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+        {/* JSON Mode */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={jsonModeId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            JSON Mode
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              id={jsonModeId}
+              checked={jsonMode}
+              onChange={(e) => setJsonMode(e.target.checked)}
+              type="checkbox"
+              className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
+              placeholder="Enter the model for the OpenAI API"
+            />
+            <label htmlFor={jsonModeId} className="text-sm">
+              Enabled
+            </label>
+          </div>
+        </div>
+        {/* Stream */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={streamId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Stream
+          </label>
+          <div className="flex items-center gap-2">
+            <input
+              id={streamId}
+              checked={stream}
+              onChange={(e) => setStream(e.target.checked)}
+              type="checkbox"
+              className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
+            />
+            <label htmlFor={streamId} className="text-sm">
+              Enabled
+            </label>
+          </div>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button
+          className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 disabled:text-slate-800 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+          onClick={() => {
+            save();
+          }}
+          ref={saveSettingsButtonRef}
+          disabled={
+            model === settings.model &&
+            seed === settings.seed &&
+            temperature === settings.temperature &&
+            maxTokens === settings.maxTokens &&
+            topP === settings.topP &&
+            presencePenalty === settings.presencePenalty &&
+            frequencyPenalty === settings.frequencyPenalty &&
+            jsonMode === settings.jsonMode &&
+            stop.length === settings.stop.length &&
+            stop.every(
+              (stopSequence, index) => stopSequence === settings.stop[index]
+            ) &&
+            stream === settings.stream
+          }
+        >
+          Save
+        </button>
+        <button
+          className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-100 disabled:text-slate-400 bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 focus:outline-none"
+          onClick={() => {
+            reset();
+          }}
+          disabled={
+            model === settings.model &&
+            seed === settings.seed &&
+            temperature === settings.temperature &&
+            maxTokens === settings.maxTokens &&
+            topP === settings.topP &&
+            presencePenalty === settings.presencePenalty &&
+            frequencyPenalty === settings.frequencyPenalty &&
+            jsonMode === settings.jsonMode &&
+            stop.length === settings.stop.length &&
+            stop.every(
+              (stopSequence, index) => stopSequence === settings.stop[index]
+            ) &&
+            stream === settings.stream
+          }
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const SamplingSettingsDialog = ({
   settings,
   setSettings,
@@ -1031,6 +1391,8 @@ const SamplingSettingsDialog = ({
   const stopSequenceId = useId();
   const [stop, setStop] = useState<string[]>(settings.stop);
   const stopId = useId();
+  const [stream, setStream] = useState(settings.stream);
+  const streamId = useId();
 
   const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -1045,6 +1407,7 @@ const SamplingSettingsDialog = ({
       frequencyPenalty,
       jsonMode,
       stop,
+      stream,
     };
     setSettings(newSettings);
   };
@@ -1281,6 +1644,27 @@ const SamplingSettingsDialog = ({
                 </label>
               </div>
             </div>
+            {/* Stream */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor={streamId}
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Stream
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id={streamId}
+                  checked={stream}
+                  onChange={(e) => setStream(e.target.checked)}
+                  type="checkbox"
+                  className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
+                />
+                <label htmlFor={streamId} className="text-sm">
+                  Enabled
+                </label>
+              </div>
+            </div>
           </div>
           <div>
             <button
@@ -1297,6 +1681,247 @@ const SamplingSettingsDialog = ({
         </Dialog.Panel>
       </div>
     </Dialog>
+  );
+};
+
+const ToolSettings = ({
+  tools,
+  setTools,
+  toolChoice,
+  setToolChoice,
+}: {
+  tools: ChatCompletionTool[];
+  setTools: (tools: ChatCompletionTool[]) => void;
+  toolChoice: ChatCompletionToolChoiceOption;
+  setToolChoice: (toolChoice: ChatCompletionToolChoiceOption) => void;
+}) => {
+  const [currentToolChoice, setCurrentToolChoice] =
+    useState<ChatCompletionToolChoiceOption>(toolChoice);
+  const [currentTools, setCurrentTools] = useState<
+    { name: string; description: string; parameters: string }[]
+  >(
+    tools.map((tool) => ({
+      name: tool.function.name,
+      description: tool.function.description ?? "",
+      parameters: JSON.stringify(tool.function.parameters, null, 2) ?? "",
+    }))
+  );
+  const saveToolSettings = () => {
+    const tools_parsed = currentTools.map((tool) => ({
+      type: "function" as const,
+      function: {
+        name: tool.name,
+        description: tool.description,
+        parameters: JSON.parse(tool.parameters),
+      },
+    }));
+    setTools(tools_parsed);
+    setToolChoice(currentToolChoice);
+  };
+  const reset = () => {
+    setCurrentTools(
+      tools.map((tool) => ({
+        name: tool.function.name,
+        description: tool.function.description ?? "",
+        parameters: JSON.stringify(tool.function.parameters, null, 2) ?? "",
+      }))
+    );
+    setCurrentToolChoice(toolChoice);
+  };
+
+  return (
+    <>
+      <div className="w-full h-full p-4 gap-2 flex flex-col max-h-dvh">
+        <div>
+          <div className="flex justify-between">
+            <h1 className="font-bold text-lg">Tools</h1>
+          </div>
+          <p className="text-slate-500">Configure tools.</p>
+        </div>
+        <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2">
+          <div className="flex flex-col gap-2">
+            <label className="text-slate-800 dark:text-slate-400 text-sm font-bold">
+              Tool Choice
+            </label>
+            <select
+              value={
+                typeof currentToolChoice === "string"
+                  ? currentToolChoice
+                  : `tool:${currentToolChoice.function.name}`
+              }
+              onChange={(e) => {
+                if (e.target.value.startsWith("tool:")) {
+                  setCurrentToolChoice({
+                    type: "function",
+                    function: {
+                      name: e.target.value.split(":")[1],
+                    },
+                  });
+                } else {
+                  if (e.target.value === "auto") {
+                    setCurrentToolChoice("auto");
+                  } else {
+                    setCurrentToolChoice("none");
+                  }
+                }
+              }}
+              className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            >
+              <option value="auto">Auto</option>
+              <option value="none">None</option>
+              {currentTools.map((tool) => (
+                <option key={tool.name} value={`tool:${tool.name}`}>
+                  Tool: {tool.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-slate-800 dark:text-slate-400 text-sm font-bold">
+              Tools
+            </label>
+            <ul className="flex flex-col gap-2">
+              {currentTools.map((tool, index) => (
+                <li
+                  key={index}
+                  className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-400 rounded-lg ring-1 overflow-hidden"
+                >
+                  <div className="flex flex-col relative">
+                    <div className="flex flex-col bg-slate-200 p-2">
+                      <div className="flex justify-between">
+                        <input
+                          className="border-none focus:ring-0 focus:border-none bg-transparent font-bold p-0 flex-1"
+                          value={tool.name}
+                          onChange={(e) => {
+                            setCurrentTools(
+                              currentTools.map((t, i) =>
+                                i === index
+                                  ? {
+                                      ...t,
+                                      name: e.target.value,
+                                    }
+                                  : t
+                              )
+                            );
+                          }}
+                          placeholder="Enter tool name here."
+                        />
+                        <button
+                          onClick={() => {
+                            setCurrentTools(
+                              currentTools.filter((_, i) => i !== index)
+                            );
+                          }}
+                          className="p-1 bg-transparent border-none focus:border-none focus:ring-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <ResizeableTextarea
+                        className="border-none focus:ring-0 focus:border-none resize-none bg-transparent p-0"
+                        value={tool.description}
+                        onChange={(
+                          e: React.ChangeEvent<HTMLTextAreaElement>
+                        ) => {
+                          setCurrentTools(
+                            currentTools.map((t, i) =>
+                              i === index
+                                ? {
+                                    ...t,
+                                    description: e.target.value,
+                                  }
+                                : t
+                            )
+                          );
+                        }}
+                        placeholder="Enter tool description here."
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <code className="whitespace-pre-wrap w-full rounded-lg">
+                        <CodeMirror
+                          basicSetup={{
+                            lineNumbers: false,
+                            foldGutter: false,
+                            highlightActiveLine: false,
+                            highlightSelectionMatches: false,
+                          }}
+                          className="rounded-lg p-0 bg-white text-base"
+                          extensions={[json()]}
+                          value={tool.parameters}
+                          placeholder="Enter OpenAPI Spec JSON here."
+                          onChange={(value) => {
+                            setCurrentTools(
+                              currentTools.map((t, i) =>
+                                i === index ? { ...t, parameters: value } : t
+                              )
+                            );
+                          }}
+                        />
+                      </code>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <button
+              onClick={() =>
+                setCurrentTools([
+                  ...currentTools,
+                  {
+                    name: "",
+                    description: "",
+                    parameters: "{}",
+                  },
+                ])
+              }
+              className="px-2 py-1 sm:py-4 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
+            >
+              <PlusCircle className="w-5 h-5" />
+              Add Tool
+            </button>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 disabled:text-slate-800 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+            onClick={() => {
+              saveToolSettings();
+            }}
+            disabled={
+              currentTools.length === tools.length &&
+              currentTools.every(
+                (tool, index) =>
+                  tool.name === tools[index].function.name &&
+                  tool.description === tools[index].function.description &&
+                  tool.parameters ===
+                    JSON.stringify(tools[index].function.parameters)
+              ) &&
+              currentToolChoice === toolChoice
+            }
+          >
+            Save
+          </button>
+          <button
+            onClick={reset}
+            className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-100 disabled:text-slate-400 bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 focus:outline-none"
+            disabled={
+              currentTools.length === tools.length &&
+              currentTools.every(
+                (tool, index) =>
+                  tool.name === tools[index].function.name &&
+                  tool.description === tools[index].function.description &&
+                  tool.parameters ===
+                    JSON.stringify(tools[index].function.parameters)
+              ) &&
+              currentToolChoice === toolChoice
+            }
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+    </>
   );
 };
 
@@ -1415,8 +2040,8 @@ const ToolSettingsDialog = ({
                             value={tool.name}
                             onChange={(e) => {
                               setCurrentTools(
-                                currentTools.map((t, index) =>
-                                  index === index
+                                currentTools.map((t, i) =>
+                                  i === index
                                     ? {
                                         ...t,
                                         name: e.target.value,
@@ -1445,8 +2070,8 @@ const ToolSettingsDialog = ({
                             e: React.ChangeEvent<HTMLTextAreaElement>
                           ) => {
                             setCurrentTools(
-                              currentTools.map((t, index) =>
-                                index === index
+                              currentTools.map((t, i) =>
+                                i === index
                                   ? {
                                       ...t,
                                       description: e.target.value,
@@ -1473,10 +2098,8 @@ const ToolSettingsDialog = ({
                             placeholder="Enter OpenAPI Spec JSON here."
                             onChange={(value) => {
                               setCurrentTools(
-                                currentTools.map((t, index) =>
-                                  index === index
-                                    ? { ...t, parameters: value }
-                                    : t
+                                currentTools.map((t, i) =>
+                                  i === index ? { ...t, parameters: value } : t
                                 )
                               );
                             }}
@@ -1524,7 +2147,7 @@ const ToolSettingsDialog = ({
 const ShowScrollToBottom = ({
   elementRef,
   children,
-  deps
+  deps,
 }: {
   elementRef: React.RefObject<HTMLElement>;
   children: React.ReactNode;
@@ -1541,7 +2164,8 @@ const ShowScrollToBottom = ({
         elementRef.current.scrollTop -
         elementRef.current.clientHeight;
       const isAtBottom = distanceToBottom <= 5;
-      const hasScrollBar = elementRef.current.scrollHeight > elementRef.current.clientHeight;
+      const hasScrollBar =
+        elementRef.current.scrollHeight > elementRef.current.clientHeight;
       // show scroll button
       setShowScrollButton(hasScrollBar && !isAtBottom);
     };
@@ -1613,6 +2237,51 @@ export default function Home() {
     });
     createChatCompletion(messages, settings, tools, toolChoice, { signal })
       .then(async (responseStream) => {
+        if (!settings.stream) {
+          const response = responseStream as ChatCompletion;
+          const content = response.choices[0].message.content;
+          if (content) {
+            setMessages((messages) => [
+              ...messages.slice(0, -1),
+              { role: "assistant", content },
+            ]);
+          }
+          const toolCalls = response.choices[0].message.tool_calls;
+          if (toolCalls) {
+            setMessages((messages) => {
+              const lastMessage = messages[
+                messages.length - 1
+              ] as ChatCompletionMessage;
+              let lastMessageToolCalls =
+                lastMessage.tool_calls === undefined
+                  ? []
+                  : lastMessage.tool_calls;
+              if (
+                toolCalls[0].id !== undefined &&
+                lastMessageToolCalls.filter(
+                  (toolCall) => toolCall.id === toolCalls[0].id
+                ).length === 0
+              ) {
+                const newToolCall = {
+                  id: toolCalls[0].id,
+                  type: toolCalls[0].type,
+                  function: {
+                    name: toolCalls[0].function?.name,
+                    arguments: toolCalls[0].function?.arguments || "",
+                  },
+                };
+                const newLastMessage = {
+                  ...lastMessage,
+                  tool_calls: [...lastMessageToolCalls, newToolCall],
+                };
+                return [...messages.slice(0, -1), newLastMessage];
+              }
+              return messages;
+            });
+          }
+          setCompletionMetrics(null);
+          return;
+        }
         setCompletionMetrics((metrics) => {
           if (metrics) {
             const now = Date.now();
@@ -1625,7 +2294,7 @@ export default function Home() {
           }
           return null;
         });
-        for await (const message of responseStream) {
+        for await (const message of responseStream as Stream<ChatCompletionChunk>) {
           setCompletionMetrics((metrics) => {
             if (metrics) {
               const now = Date.now();
@@ -1760,7 +2429,7 @@ export default function Home() {
       autoFocus
       tabIndex={0}
     >
-      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-7xl w-full bg-stone-50 overflow-hidden">
+      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-screen-2xl w-full bg-stone-50 overflow-hidden">
         <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 sm:border-none flex justify-between items-center sm:items-baseline">
           <div className="flex flex-col">
             <h1 className="text-lg font-bold">Chat Playground</h1>
@@ -1787,18 +2456,18 @@ export default function Home() {
           <div className="flex gap-2">
             <CopyButton value={JSON.stringify(messages, null, 2)} />
             <button
-              onClick={() => setToolSettingsOpen(!toolSettingsOpen)}
-              className="focus:outline-none"
-              title="Tools"
-            >
-              <Wrench className="w-5 h-5 text-slate-500 hover:text-slate-800" />
-            </button>
-            <button
               onClick={() => setSamplingSettingsOpen(!samplingSettingsOpen)}
-              className="focus:outline-none"
+              className="focus:outline-none block lg:hidden"
               title="Request Parameters"
             >
               <Settings2 className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+            </button>
+            <button
+              onClick={() => setToolSettingsOpen(!toolSettingsOpen)}
+              className="focus:outline-none block lg:hidden"
+              title="Tools"
+            >
+              <Wrench className="w-5 h-5 text-slate-500 hover:text-slate-800" />
             </button>
             <button
               onClick={() => setSettingsOpen(!settingsOpen)}
@@ -1809,55 +2478,104 @@ export default function Home() {
             </button>
           </div>
         </div>
-        <div className="w-full h-full flex flex-col items-start gap-2 pb-4 overflow-y-auto relative">
-          <div
-            className="w-full h-full flex flex-col items-start gap-2 pb-4 overflow-y-auto"
-            ref={messageContainerRef}
-          >
-            <ul className="flex flex-col w-full divide-y divide-slate-200">
-              {messages.map((message, index) => {
-                return (
-                  <li key={index} className="flex-1">
-                    <ChatMessage
-                      message={message}
-                      setMessage={(newMessage: any) => {
-                        setMessages((messages) => {
-                          const newMessages = [...messages];
-                          newMessages[index] = newMessage;
-                          return newMessages;
-                        });
-                      }}
-                      deleteMessage={() => {
-                        deleteMessage(index);
-                      }}
-                    />
-                  </li>
-                );
-              })}
-            </ul>
-            <button
-              ref={messagesContainerBottomRef}
-              onClick={addNewMessage}
-              className="p-1 sm:p-4 px-3 sm:px-6 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
+        <div className="h-full w-full flex justify-between overflow-y-auto">
+          <div className="w-full h-full flex flex-col items-start gap-2 pb-4 overflow-y-auto relative">
+            <div
+              className="w-full h-full flex flex-col items-start gap-2 pb-4 overflow-y-auto"
+              ref={messageContainerRef}
             >
-              <PlusCircle className="w-4 h-4" />
-              Add message
-            </button>
-          </div>
-          <ShowScrollToBottom elementRef={messageContainerRef} deps={[messages]}>
-            <div className="bottom-0 left-0 right-0 w-full absolute flex items-center justify-center pb-2">
+              <ul className="flex flex-col w-full divide-y divide-slate-200">
+                {messages.map((message, index) => {
+                  return (
+                    <li key={index} className="flex-1">
+                      <ChatMessage
+                        message={message}
+                        setMessage={(newMessage: any) => {
+                          setMessages((messages) => {
+                            const newMessages = [...messages];
+                            newMessages[index] = newMessage;
+                            return newMessages;
+                          });
+                        }}
+                        deleteMessage={() => {
+                          deleteMessage(index);
+                        }}
+                      />
+                    </li>
+                  );
+                })}
+              </ul>
               <button
-                className="px-2 py-2 w-auto rounded-full bg-white hover:bg-slate-100 text-slate-800 font-bold focus:outline-none border border-slate-200 shadow flex"
-                onClick={() => {
-                  messagesContainerBottomRef.current?.scrollIntoView({
-                    behavior: "instant",
-                  });
-                }}
+                ref={messagesContainerBottomRef}
+                onClick={addNewMessage}
+                className="p-1 sm:p-4 px-3 sm:px-6 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
               >
-                <ArrowDown />
+                <PlusCircle className="w-4 h-4" />
+                Add message
               </button>
             </div>
-          </ShowScrollToBottom>
+            <ShowScrollToBottom
+              elementRef={messageContainerRef}
+              deps={[messages]}
+            >
+              <div className="bottom-0 left-0 right-0 w-full absolute flex items-center justify-center pb-2">
+                <button
+                  className="px-2 py-2 w-auto rounded-full bg-white hover:bg-slate-100 text-slate-800 font-bold focus:outline-none border border-slate-200 shadow flex"
+                  onClick={() => {
+                    messagesContainerBottomRef.current?.scrollIntoView({
+                      behavior: "instant",
+                    });
+                  }}
+                >
+                  <ArrowDown />
+                </button>
+              </div>
+            </ShowScrollToBottom>
+          </div>
+          <div className="hidden lg:flex flex-col h-full w-full max-w-md">
+            <Tab.Group>
+              <span className="px-2 flex w-full">
+                <Tab.List className="bg-slate-200 p-1 rounded-lg font-bold flex w-full">
+                  <Tab
+                    className={({ selected }) =>
+                      "flex-1 focus:outline-none py-1 px-4 " +
+                      (selected
+                        ? "bg-white rounded-lg shadow text-slate-800"
+                        : "bg-transparent text-slate-500")
+                    }
+                  >
+                    Parameters
+                  </Tab>
+                  <Tab
+                    className={({ selected }) =>
+                      "flex-1 focus:outline-none py-1 px-4 " +
+                      (selected
+                        ? "bg-white rounded-lg shadow text-slate-800"
+                        : "bg-transparent text-slate-500")
+                    }
+                  >
+                    Tools
+                  </Tab>
+                </Tab.List>
+              </span>
+              <Tab.Panels>
+                <Tab.Panel>
+                  <SamplingSettings
+                    settings={settings}
+                    setSettings={setSettings}
+                  />
+                </Tab.Panel>
+                <Tab.Panel>
+                  <ToolSettings
+                    tools={tools}
+                    setTools={setTools}
+                    toolChoice={toolChoice}
+                    setToolChoice={setToolChoice}
+                  />
+                </Tab.Panel>
+              </Tab.Panels>
+            </Tab.Group>
+          </div>
         </div>
         {/* section: send button, stop button, tool choice, completion metrics */}
         <div className="w-full px-0 sm:px-4 pt-2 border-t border-slate-200 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
