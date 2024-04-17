@@ -1425,7 +1425,7 @@ const SamplingSettingsDialog = ({
           <div>
             <div className="flex justify-between">
               <Dialog.Title className="font-bold text-lg">
-                Request Parameters
+                Parameters
               </Dialog.Title>
               <button
                 className="focus:outline-none text-slate-600 hover:text-slate-800"
@@ -1804,7 +1804,7 @@ const ToolSettings = ({
                               )
                             );
                           }}
-                          placeholder="Enter tool name here."
+                          placeholder="Tool name"
                         />
                         <button
                           onClick={() => {
@@ -1834,7 +1834,7 @@ const ToolSettings = ({
                             )
                           );
                         }}
-                        placeholder="Enter tool description here."
+                        placeholder="Tool description"
                       />
                     </div>
                     <div className="flex flex-col">
@@ -1849,7 +1849,7 @@ const ToolSettings = ({
                           className="rounded-lg p-0 bg-white text-base"
                           extensions={[json()]}
                           value={tool.parameters}
-                          placeholder="Enter OpenAPI Spec JSON here."
+                          placeholder="Tool parameters (OpenAPI JSON)"
                           onChange={(value) => {
                             setCurrentTools(
                               currentTools.map((t, i) =>
@@ -2050,7 +2050,7 @@ const ToolSettingsDialog = ({
                                 )
                               );
                             }}
-                            placeholder="Enter tool name here."
+                            placeholder="Tool name"
                           />
                           <button
                             onClick={() => {
@@ -2080,7 +2080,7 @@ const ToolSettingsDialog = ({
                               )
                             );
                           }}
-                          placeholder="Enter tool description here."
+                          placeholder="Tool description"
                         />
                       </div>
                       <div className="flex flex-col">
@@ -2095,7 +2095,7 @@ const ToolSettingsDialog = ({
                             className="rounded-lg p-0 bg-white text-base"
                             extensions={[json()]}
                             value={tool.parameters}
-                            placeholder="Enter OpenAPI Spec JSON here."
+                            placeholder="Tool parameters (OpenAPI JSON)"
                             onChange={(value) => {
                               setCurrentTools(
                                 currentTools.map((t, i) =>
@@ -2458,7 +2458,7 @@ export default function Home() {
             <button
               onClick={() => setSamplingSettingsOpen(!samplingSettingsOpen)}
               className="focus:outline-none block lg:hidden"
-              title="Request Parameters"
+              title="Parameters"
             >
               <Settings2 className="w-5 h-5 text-slate-500 hover:text-slate-800" />
             </button>
