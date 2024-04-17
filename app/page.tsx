@@ -1718,6 +1718,18 @@ const ToolSettings = ({
     setTools(tools_parsed);
     setToolChoice(currentToolChoice);
   };
+  useEffect(() => {
+    setCurrentTools(
+      tools.map((tool) => ({
+        name: tool.function.name,
+        description: tool.function.description ?? "",
+        parameters: JSON.stringify(tool.function.parameters, null, 2) ?? "",
+      }))
+    );
+  }, [tools]);
+  useEffect(() => {
+    setCurrentToolChoice(toolChoice);
+  }, [toolChoice]);
   const reset = () => {
     setCurrentTools(
       tools.map((tool) => ({
@@ -1895,7 +1907,7 @@ const ToolSettings = ({
                   tool.name === tools[index].function.name &&
                   tool.description === tools[index].function.description &&
                   tool.parameters ===
-                    JSON.stringify(tools[index].function.parameters)
+                    JSON.stringify(tools[index].function.parameters, null, 2)
               ) &&
               currentToolChoice === toolChoice
             }
@@ -1912,7 +1924,7 @@ const ToolSettings = ({
                   tool.name === tools[index].function.name &&
                   tool.description === tools[index].function.description &&
                   tool.parameters ===
-                    JSON.stringify(tools[index].function.parameters)
+                    JSON.stringify(tools[index].function.parameters, null, 2)
               ) &&
               currentToolChoice === toolChoice
             }
