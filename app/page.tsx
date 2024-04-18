@@ -2496,7 +2496,7 @@ export default function Home() {
           <div className="flex flex-col justify-between flex-1 h-full">
             <div className="flex flex-col items-start gap-2 pb-4 relative overflow-hidden">
               <div
-                className="flex flex-col items-start gap-2 pb-4 w-full overflow-y-scroll"
+                className="flex flex-col items-start gap-2 pb-4 w-full overflow-y-auto"
                 ref={messageContainerRef}
               >
                 <ul className="flex flex-col w-full divide-y divide-slate-200">
