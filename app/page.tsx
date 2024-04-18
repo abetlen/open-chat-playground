@@ -133,11 +133,11 @@ const reactMarkdownComponents = {
   // list
   ul: (props: any) => {
     const { children, ...rest } = props;
-    return <ul className="list-disc pl-8">{children}</ul>;
+    return <ul className="list-disc pl-8 inline-flex flex-col">{children}</ul>;
   },
   ol: (props: any) => {
     const { children, ...rest } = props;
-    return <ol className="list-decimal pl-8">{children}</ol>;
+    return <ol className="list-decimal pl-8 inline-flex flex-col">{children}</ol>;
   },
   li: (props: any) => {
     const { children, ...rest } = props;
@@ -221,7 +221,7 @@ const INITIAL_SETTINGS: Settings = {
   maxTokens: -1,
   stop: [],
   jsonMode: false,
-  stream: false,
+  stream: true,
 };
 
 const INITIAL_TOOLS: ChatCompletionTool[] = [
@@ -2129,7 +2129,7 @@ const ToolSettingsDialog = ({
                     {
                       name: "",
                       description: "",
-                      parameters: "",
+                      parameters: "{}",
                     },
                   ])
                 }
