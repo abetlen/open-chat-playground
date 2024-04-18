@@ -1079,7 +1079,7 @@ const SamplingSettings = ({
       </div>
       <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2 flex-1">
         {/* model */}
-        <div className="w-ful">
+        <div className="w-full">
           <label
             htmlFor={modelId}
             className="text-slate-800 dark:text-slate-400 text-sm font-bold"
