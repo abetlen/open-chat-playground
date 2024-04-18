@@ -6,8 +6,8 @@ import type { Viewport } from "next";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Chat Playground",
-  description: "Chat Playground",
+  title: "Open Chat Playground",
+  description: "Open Chat Playground",
 };
 
 export const viewport: Viewport = {

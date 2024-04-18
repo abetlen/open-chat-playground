@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     output: "export",
-    basePath: "/chat-playground",
+    basePath: "/open-chat-playground",
     distDir: 'out',
 };
 

@@ -12,13 +12,13 @@ It provides a few additional features over the UI at [OpenAI Playground](https:/
 # Setup
 
 ```bash
-git clone git@github.com:abetlen/chat-playground.git
-cd chat-playground
+git clone git@github.com:abetlen/open-chat-playground.git
+cd open-chat-playground
 npm install
 npm run dev
 ```
 
-Then just visit [http://localhost:3000/chat-playground](http://localhost:3000/chat-playground) in your browser.
+Then just visit [http://localhost:3000/open-chat-playground](http://localhost:3000/open-chat-playground) in your browser.
 
 # Connecting to Other API Providers (Cohere, Groq, Anthropic)
 

@@ -2446,7 +2446,7 @@ export default function Home() {
       <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-screen-2xl w-full bg-stone-50 overflow-hidden">
         <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 sm:border-none flex justify-between items-center sm:items-baseline overflow-hidden">
           <div className="flex flex-col">
-            <h1 className="text-lg font-bold">Chat Playground</h1>
+            <h1 className="text-lg font-bold">Open Chat Playground</h1>
             <p className="text-slate-500 dark:text-slate-400 hidden sm:block">
               Test out OpenAI <code>/v1/chat/completions</code> compatible web
               servers.
