@@ -137,7 +137,9 @@ const reactMarkdownComponents = {
   },
   ol: (props: any) => {
     const { children, ...rest } = props;
-    return <ol className="list-decimal pl-8 inline-flex flex-col">{children}</ol>;
+    return (
+      <ol className="list-decimal pl-8 inline-flex flex-col">{children}</ol>
+    );
   },
   li: (props: any) => {
     const { children, ...rest } = props;
@@ -1069,7 +1071,7 @@ const SamplingSettings = ({
 
   return (
     <div className="w-full h-full p-4 gap-2 flex flex-col">
-      <div className="flex-auto">
+      <div>
         <div className="flex justify-between">
           <div className="font-bold text-lg">Parameters</div>
         </div>
@@ -1077,7 +1079,7 @@ const SamplingSettings = ({
           Configure parameters for chat completion requests.
         </p>
       </div>
-      <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2 flex-1">
+      <div className="flex flex-col gap-4 py-4 overflow-y-auto px-2 -mx-2">
         {/* model */}
         <div className="w-full">
           <label
@@ -1303,7 +1305,7 @@ const SamplingSettings = ({
           </div>
         </div>
       </div>
-      <div className="flex gap-2 flex-auto">
+      <div className="flex gap-2">
         <button
           className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 disabled:text-slate-800 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
           onClick={() => {
@@ -1743,7 +1745,7 @@ const ToolSettings = ({
 
   return (
     <>
-      <div className="w-full h-full p-4 gap-2 flex flex-col max-h-dvh">
+      <div className="w-full h-full p-4 gap-2 flex flex-col">
         <div>
           <div className="flex justify-between">
             <h1 className="font-bold text-lg">Tools</h1>
@@ -2442,7 +2444,7 @@ export default function Home() {
       tabIndex={0}
     >
       <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-screen-2xl w-full bg-stone-50 overflow-hidden">
-        <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 sm:border-none flex justify-between items-center sm:items-baseline">
+        <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 sm:border-none flex justify-between items-center sm:items-baseline overflow-hidden">
           <div className="flex flex-col">
             <h1 className="text-lg font-bold">Chat Playground</h1>
             <p className="text-slate-500 dark:text-slate-400 hidden sm:block">
@@ -2490,63 +2492,172 @@ export default function Home() {
             </button>
           </div>
         </div>
-        <div className="h-full w-full flex justify-between overflow-y-auto">
-          <div className="w-full h-full flex flex-col items-start gap-2 pb-4 overflow-y-auto relative">
-            <div
-              className="w-full h-full flex flex-col items-start gap-2 pb-4 overflow-y-auto"
-              ref={messageContainerRef}
-            >
-              <ul className="flex flex-col w-full divide-y divide-slate-200">
-                {messages.map((message, index) => {
-                  return (
-                    <li key={index} className="flex-1">
-                      <ChatMessage
-                        message={message}
-                        setMessage={(newMessage: any) => {
-                          setMessages((messages) => {
-                            const newMessages = [...messages];
-                            newMessages[index] = newMessage;
-                            return newMessages;
-                          });
-                        }}
-                        deleteMessage={() => {
-                          deleteMessage(index);
-                        }}
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-              <button
-                ref={messagesContainerBottomRef}
-                onClick={addNewMessage}
-                className="p-1 sm:p-4 px-3 sm:px-6 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
+        <div className="flex h-full overflow-hidden">
+          <div className="flex flex-col justify-between flex-1 h-full">
+            <div className="flex flex-col items-start gap-2 pb-4 relative overflow-hidden">
+              <div
+                className="flex flex-col items-start gap-2 pb-4 w-full overflow-y-scroll"
+                ref={messageContainerRef}
               >
-                <PlusCircle className="w-4 h-4" />
-                Add message
-              </button>
-            </div>
-            <ShowScrollToBottom
-              elementRef={messageContainerRef}
-              deps={[messages]}
-            >
-              <div className="bottom-0 left-0 right-0 w-full absolute flex items-center justify-center pb-2">
+                <ul className="flex flex-col w-full divide-y divide-slate-200">
+                  {messages.map((message, index) => {
+                    return (
+                      <li key={index} className="flex-1">
+                        <ChatMessage
+                          message={message}
+                          setMessage={(newMessage: any) => {
+                            setMessages((messages) => {
+                              const newMessages = [...messages];
+                              newMessages[index] = newMessage;
+                              return newMessages;
+                            });
+                          }}
+                          deleteMessage={() => {
+                            deleteMessage(index);
+                          }}
+                        />
+                      </li>
+                    );
+                  })}
+                </ul>
                 <button
-                  className="px-2 py-2 w-auto rounded-full bg-white hover:bg-slate-100 text-slate-800 font-bold focus:outline-none border border-slate-200 shadow flex"
-                  onClick={() => {
-                    messagesContainerBottomRef.current?.scrollIntoView({
-                      behavior: "instant",
-                    });
-                  }}
+                  ref={messagesContainerBottomRef}
+                  onClick={addNewMessage}
+                  className="p-1 sm:p-4 px-3 sm:px-6 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
                 >
-                  <ArrowDown />
+                  <PlusCircle className="w-4 h-4" />
+                  Add message
                 </button>
               </div>
-            </ShowScrollToBottom>
+              <ShowScrollToBottom
+                elementRef={messageContainerRef}
+                deps={[messages]}
+              >
+                <div className="bottom-0 left-0 right-0 w-full absolute flex items-center justify-center pb-2">
+                  <button
+                    className="px-2 py-2 w-auto rounded-full bg-white hover:bg-slate-100 text-slate-800 font-bold focus:outline-none border border-slate-200 shadow flex"
+                    onClick={() => {
+                      messagesContainerBottomRef.current?.scrollIntoView({
+                        behavior: "instant",
+                      });
+                    }}
+                  >
+                    <ArrowDown />
+                  </button>
+                </div>
+              </ShowScrollToBottom>
+            </div>
+
+            {/* section: send button, stop button, tool choice, completion metrics */}
+            <div className="px-0 sm:px-4 pt-2 border-t border-slate-200 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
+              {abortController && (
+                <button
+                  onClick={() => abortController.abort()}
+                  className="px-4 py-2 w-full sm:w-auto rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold focus:outline-none"
+                >
+                  Stop
+                </button>
+              )}
+              {!abortController && (
+                <button
+                  title="Submit message (CTRL+Enter)"
+                  onClick={sendMessage}
+                  className="px-4 py-2 w-full sm:w-auto rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 text-white focus:outline-none"
+                >
+                  Submit
+                </button>
+              )}
+              {tools.length > 0 && (
+                <select
+                  value={
+                    typeof toolChoice === "string"
+                      ? toolChoice
+                      : `tool:${toolChoice.function.name}`
+                  }
+                  onChange={(e) => {
+                    if (e.target.value.startsWith("tool:")) {
+                      setToolChoice({
+                        type: "function",
+                        function: {
+                          name: e.target.value.split(":")[1],
+                        },
+                      });
+                    } else {
+                      if (e.target.value === "auto") {
+                        setToolChoice("auto");
+                      } else {
+                        setToolChoice("none");
+                      }
+                    }
+                  }}
+                  className="w-auto min-w-[14rem] p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                >
+                  <option value="auto">Auto</option>
+                  <option value="none">None</option>
+                  {tools.map((tool) => (
+                    <option
+                      key={tool.function.name}
+                      value={`tool:${tool.function.name}`}
+                    >
+                      Tool: {tool.function.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+              {completionMetrics && (
+                <div className="text-sm text-slate-500 dark:text-slate-400 flex flex-col">
+                  {/* time to first token */}
+                  {completionMetrics.firstTokenTime &&
+                    completionMetrics.startTime && (
+                      <div
+                        className="flex justify-between gap-2"
+                        title={`Time to first token: ${(
+                          completionMetrics.firstTokenTime -
+                          completionMetrics.startTime
+                        ).toFixed(0)}ms`}
+                      >
+                        <span>TTFT: </span>
+                        <span>
+                          {(
+                            completionMetrics.firstTokenTime -
+                            completionMetrics.startTime
+                          ).toFixed(0)}
+                          ms
+                        </span>
+                      </div>
+                    )}
+                  {/* tokens per second */}
+                  {completionMetrics.nTokens &&
+                    completionMetrics.latestTokenTime &&
+                    completionMetrics.firstTokenTime && (
+                      <div
+                        className="flex justify-between gap-2"
+                        title={`Tokens per second: ${(
+                          completionMetrics.nTokens /
+                          ((completionMetrics.latestTokenTime -
+                            completionMetrics.firstTokenTime) /
+                            1000)
+                        ).toFixed(2)}`}
+                      >
+                        <span>TPS: </span>
+                        <span>
+                          {(
+                            completionMetrics.nTokens /
+                            ((completionMetrics.latestTokenTime -
+                              completionMetrics.firstTokenTime) /
+                              1000)
+                          ).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="hidden lg:flex flex-col h-full w-full max-w-md overflow-y-auto">
+
+          <div className="hidden lg:flex flex-col max-w-md w-full overflow-hidden">
             <Tab.Group>
-              <span className="px-2 flex w-full">
+              <span className="px-2 flex">
                 <Tab.List className="bg-slate-200 p-1 rounded-lg font-bold flex w-full">
                   <Tab
                     className={({ selected }) =>
@@ -2570,14 +2681,14 @@ export default function Home() {
                   </Tab>
                 </Tab.List>
               </span>
-              <Tab.Panels>
-                <Tab.Panel>
+              <Tab.Panels className="h-full overflow-hidden">
+                <Tab.Panel className="h-full">
                   <SamplingSettings
                     settings={settings}
                     setSettings={setSettings}
                   />
                 </Tab.Panel>
-                <Tab.Panel>
+                <Tab.Panel className="h-full">
                   <ToolSettings
                     tools={tools}
                     setTools={setTools}
@@ -2588,111 +2699,6 @@ export default function Home() {
               </Tab.Panels>
             </Tab.Group>
           </div>
-        </div>
-        {/* section: send button, stop button, tool choice, completion metrics */}
-        <div className="w-full px-0 sm:px-4 pt-2 border-t border-slate-200 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
-          {abortController && (
-            <button
-              onClick={() => abortController.abort()}
-              className="px-4 py-2 w-full sm:w-auto rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold focus:outline-none"
-            >
-              Stop
-            </button>
-          )}
-          {!abortController && (
-            <button
-              title="Submit message (CTRL+Enter)"
-              onClick={sendMessage}
-              className="px-4 py-2 w-full sm:w-auto rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 text-white focus:outline-none"
-            >
-              Submit
-            </button>
-          )}
-          {tools.length > 0 && (
-            <select
-              value={
-                typeof toolChoice === "string"
-                  ? toolChoice
-                  : `tool:${toolChoice.function.name}`
-              }
-              onChange={(e) => {
-                if (e.target.value.startsWith("tool:")) {
-                  setToolChoice({
-                    type: "function",
-                    function: {
-                      name: e.target.value.split(":")[1],
-                    },
-                  });
-                } else {
-                  if (e.target.value === "auto") {
-                    setToolChoice("auto");
-                  } else {
-                    setToolChoice("none");
-                  }
-                }
-              }}
-              className="w-auto min-w-[14rem] p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
-            >
-              <option value="auto">Auto</option>
-              <option value="none">None</option>
-              {tools.map((tool) => (
-                <option
-                  key={tool.function.name}
-                  value={`tool:${tool.function.name}`}
-                >
-                  Tool: {tool.function.name}
-                </option>
-              ))}
-            </select>
-          )}
-          {completionMetrics && (
-            <div className="text-sm text-slate-500 dark:text-slate-400 flex flex-col">
-              {/* time to first token */}
-              {completionMetrics.firstTokenTime &&
-                completionMetrics.startTime && (
-                  <div
-                    className="flex justify-between gap-2"
-                    title={`Time to first token: ${(
-                      completionMetrics.firstTokenTime -
-                      completionMetrics.startTime
-                    ).toFixed(0)}ms`}
-                  >
-                    <span>TTFT: </span>
-                    <span>
-                      {(
-                        completionMetrics.firstTokenTime -
-                        completionMetrics.startTime
-                      ).toFixed(0)}
-                      ms
-                    </span>
-                  </div>
-                )}
-              {/* tokens per second */}
-              {completionMetrics.nTokens &&
-                completionMetrics.latestTokenTime &&
-                completionMetrics.firstTokenTime && (
-                  <div
-                    className="flex justify-between gap-2"
-                    title={`Tokens per second: ${(
-                      completionMetrics.nTokens /
-                      ((completionMetrics.latestTokenTime -
-                        completionMetrics.firstTokenTime) /
-                        1000)
-                    ).toFixed(2)}`}
-                  >
-                    <span>TPS: </span>
-                    <span>
-                      {(
-                        completionMetrics.nTokens /
-                        ((completionMetrics.latestTokenTime -
-                          completionMetrics.firstTokenTime) /
-                          1000)
-                      ).toFixed(2)}
-                    </span>
-                  </div>
-                )}
-            </div>
-          )}
         </div>
       </div>
       {settingsOpen && (
