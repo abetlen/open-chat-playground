@@ -9,6 +9,11 @@
     "start_url": "/open-chat-playground",
     "icons": [
         {
+            "src": "/open-chat-playground/favicon.ico",
+            "type": "image/x-icon",
+            "purpose": "any"
+        },
+        {
             "src": "/open-chat-playground/icons/favicon-16x16.png",
             "type": "image/png",
             "sizes": "16x16",
