@@ -2204,6 +2204,26 @@ const ShowScrollToBottom = ({
   return showScrollButton ? <>{children}</> : null;
 };
 
+const ErrorToast = ({
+  error,
+  dismiss,
+}: {
+  error: Error;
+  dismiss: () => void;
+}) => {
+  return (
+    <div className="absolute top-0 left-0 right-0 flex justify-center items-center p-2 pointer-events-none">
+      <div className="flex gap-2 p-4 bg-red-500 text-white font-bold rounded-lg items-baseline shadow-lg pointer-events-auto">
+        <div>Error:</div>
+        <div>{error.message}</div>
+        <button onClick={dismiss}>
+          <X className="w-5 h-5 -mb-1" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
   const [messages, setMessages] = useState(INITIAL_MESSAGES);
   const [tools, setTools] = useState<ChatCompletionTool[]>(INITIAL_TOOLS);
@@ -2224,6 +2244,7 @@ export default function Home() {
   } | null>(null);
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const messagesContainerBottomRef = useRef<HTMLButtonElement>(null);
+  const [error, setError] = useState<Error | null>(null);
   const deleteMessage = (index: number) => {
     const newMessages = [...messages];
     newMessages.splice(index, 1);
@@ -2426,6 +2447,7 @@ export default function Home() {
       })
       .catch((error) => {
         console.error(error);
+        setError(error);
       })
       .finally(() => {
         setAbortController(null);
@@ -2433,15 +2455,17 @@ export default function Home() {
   };
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-    navigator.serviceWorker
-      .register("/open-chat-playground/sw.js")
-      .then((registration) =>
-        console.log(
-          "Service Worker registration successful with scope: ",
-          registration.scope,
-        ),
-      )
-        .catch((err) => console.log("Service Worker registration failed: ", err));
+      navigator.serviceWorker
+        .register("/open-chat-playground/sw.js")
+        .then((registration) =>
+          console.log(
+            "Service Worker registration successful with scope: ",
+            registration.scope
+          )
+        )
+        .catch((err) =>
+          console.log("Service Worker registration failed: ", err)
+        );
     } else {
       console.log("Service Worker not supported");
     }
@@ -2740,6 +2764,7 @@ export default function Home() {
           setSettingsOpen={setToolSettingsOpen}
         />
       )}
+      {error && <ErrorToast error={error} dismiss={() => setError(null)} />}
     </div>
   );
 }
