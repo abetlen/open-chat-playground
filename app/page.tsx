@@ -2213,9 +2213,9 @@ const ErrorToast = ({
 }) => {
   return (
     <div className="absolute top-0 left-0 right-0 flex justify-center items-center p-2 pointer-events-none">
-      <div className="flex gap-2 p-4 bg-red-500 text-white font-bold rounded-lg items-baseline shadow-lg pointer-events-auto">
+      <div className="max-w-full flex gap-2 p-4 bg-red-500 text-white font-bold rounded-lg items-baseline shadow-lg pointer-events-auto">
         <div>Error:</div>
-        <div>{error.message}</div>
+        <div className="flex-1 overflow-auto">{error.message}</div>
         <button onClick={dismiss}>
           <X className="w-5 h-5 -mb-1" />
         </button>
