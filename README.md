@@ -1,4 +1,6 @@
-# Chat Playground
+# Open Chat Playground [![Open Chat Playground](./public/icons/favicon-32x32.png)](https://abetlen.github.io/open-chat-playground)
+
+![Desktop](./public/screenshots/desktop.png)
 
 Chat Playground is single page application for experimenting with OpenAI `/v1/chat/completion` compatible web servers.
 
@@ -8,6 +10,8 @@ It provides a few additional features over the UI at [OpenAI Playground](https:/
 - Tool Support
 - Multimodal (Image) Support
 - Ability to call other backends
+
+Try out the [hosted version](https://abetlen.github.io/open-chat-playground)
 
 # Setup
 

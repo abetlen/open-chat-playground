@@ -44,5 +44,12 @@
             "purpose": "any"
         }
     ],
+    "screenshots": [
+        {
+            "src": "/open-chat-playground/screenshots/desktop.png",
+            "type": "image/png",
+            "alt": "Desktop"
+        }
+    ],
     "splash_pages": null
 }
