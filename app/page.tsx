@@ -2431,6 +2431,21 @@ export default function Home() {
         setAbortController(null);
       });
   };
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/open-chat-playground/sw.js")
+      .then((registration) =>
+        console.log(
+          "Service Worker registration successful with scope: ",
+          registration.scope,
+        ),
+      )
+        .catch((err) => console.log("Service Worker registration failed: ", err));
+    } else {
+      console.log("Service Worker not supported");
+    }
+  }, []);
   return (
     <div
       className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-4 bg-stone-200 dark:bg-slate-800 relative overflow-hidden"

@@ -1,0 +1,43 @@
+{
+    "name": "Open Chat Playground",
+    "short_name": "Open Chat Playground",
+    "theme_color": "#2196f3",
+    "background_color": "#2196f3",
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/open-chat-playground",
+    "start_url": "/open-chat-playground",
+    "icons": [
+        {
+            "src": "/open-chat-playground/icons/favicon-16x16.png",
+            "type": "image/png",
+            "sizes": "16x16",
+            "purpose": "any"
+        },
+        {
+            "src": "/open-chat-playground/icons/favicon-32x32.png",
+            "type": "image/png",
+            "sizes": "32x32",
+            "purpose": "any"
+        },
+        {
+            "src": "/open-chat-playground/icons/apple-touch-icon.png",
+            "type": "image/png",
+            "sizes": "180x180",
+            "purpose": "any"
+        },
+        {
+            "src": "/open-chat-playground//icons/android-chrome-192x192.png",
+            "type": "image/png",
+            "sizes": "192x192",
+            "purpose": "any"
+        },
+        {
+            "src": "/open-chat-playground/icons/android-chrome-512x512.png",
+            "type": "image/png",
+            "sizes": "512x512",
+            "purpose": "any"
+        }
+    ],
+    "splash_pages": null
+}

@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Open Chat Playground",
   description: "Open Chat Playground",
+  manifest: "/open-chat-playground/manifest.json",
 };
 
 export const viewport: Viewport = {
