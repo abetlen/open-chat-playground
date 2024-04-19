@@ -1,8 +1,8 @@
 {
     "name": "Open Chat Playground",
     "short_name": "Open Chat Playground",
-    "theme_color": "#2196f3",
-    "background_color": "#2196f3",
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
     "display": "standalone",
     "orientation": "portrait",
     "scope": "/open-chat-playground",
