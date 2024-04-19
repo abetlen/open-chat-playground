@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="https://abetlen.github.io/open-chat-playground/icons/apple-touch-icon.png" />
+  <a href="https://abetlen.github.io/open-chat-playground">
+    <img src="https://abetlen.github.io/open-chat-playground/icons/apple-touch-icon.png" />
+  </a>
 </p>
 
 # Open Chat Playground
