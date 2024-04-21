@@ -440,12 +440,14 @@ const ContentArea = ({
   role, // TODO: should probably just be placeholder
   value,
   onChange,
+  autoFocus = false,
 }: {
   role: ChatCompletionRole;
   value: string;
   onChange: (value: string) => void;
+  autoFocus?: boolean;
 }) => {
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(autoFocus || false);
   return (
     <>
       {editing ? (
@@ -659,6 +661,7 @@ const ChatMessage = ({
                 const newMessage = { ...message, content: value };
                 setMessage(newMessage);
               }}
+              autoFocus={message.role === "user" && message.content === ""}
             />
           )}
 
