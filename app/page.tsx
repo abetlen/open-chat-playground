@@ -2532,7 +2532,7 @@ export default function Home() {
           </div>
         </div>
         <div className="flex h-full overflow-hidden">
-          <div className="flex flex-col justify-between flex-1 h-full">
+          <div className="flex flex-col justify-between flex-1 h-full overflow-hidden">
             <div className="flex flex-col items-start gap-2 pb-4 relative overflow-hidden">
               <div
                 className="flex flex-col items-start gap-2 pb-4 w-full overflow-y-auto"
