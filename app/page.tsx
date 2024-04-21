@@ -560,6 +560,7 @@ const ImageEdit = ({
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Enter image URL or paste image here."
+            autoFocus={true}
           />
           {/* file input */}
           <label className="p-2 cursor-pointer">
@@ -698,6 +699,7 @@ const ChatMessage = ({
                           };
                           setMessage(newMessage);
                         }}
+                        autoFocus={true}
                       />
                       <button
                         title="Delete tool call"
@@ -927,14 +929,14 @@ const SettingsDialog = ({
   const apiKey = useLocalStorageString("apiKey", "");
   const baseURL = useLocalStorageString("baseURL", "");
 
-  const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
+  const baseURLRef = useRef<HTMLInputElement | null>(null);
 
   return (
     <Dialog
       open={settingsOpen}
       onClose={() => setSettingsOpen(false)}
       className="relative z-50"
-      initialFocus={saveSettingsButtonRef}
+      initialFocus={baseURLRef}
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex w-screen items-start sm:items-center justify-center p-0 sm:p-4 max-h-dvh">
@@ -971,6 +973,7 @@ const SettingsDialog = ({
                 type="url"
                 className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
                 placeholder="Enter the base URL for the server or leave blank for OpenAI"
+                ref={baseURLRef}
               />
             </div>
             {/* api key */}
@@ -997,7 +1000,6 @@ const SettingsDialog = ({
               baseURL.save();
               setSettingsOpen(false);
             }}
-            ref={saveSettingsButtonRef}
           >
             Save
           </button>
@@ -1374,6 +1376,7 @@ const SamplingSettingsDialog = ({
 }) => {
   const [model, setModel] = useState(settings.model);
   const modelId = useId();
+  const modelRef = useRef<HTMLInputElement | null>(null);
   const [seed, setSeed] = useState(settings.seed);
   const seedId = useId();
   const [temperature, setTemperature] = useState(settings.temperature);
@@ -1422,7 +1425,7 @@ const SamplingSettingsDialog = ({
       open={settingsOpen}
       onClose={() => setSettingsOpen(false)}
       className="relative z-50"
-      initialFocus={saveSettingsButtonRef}
+      initialFocus={modelRef}
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex w-screen items-start sm:items-center justify-center p-0 sm:p-4 max-h-dvh">
@@ -1455,6 +1458,7 @@ const SamplingSettingsDialog = ({
               <input
                 id={modelId}
                 value={model}
+                ref={modelRef}
                 onChange={(e) => setModel(e.target.value)}
                 type="text"
                 className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
@@ -1822,6 +1826,7 @@ const ToolSettings = ({
                             );
                           }}
                           placeholder="Tool name"
+                          autoFocus={tool.name === ""}
                         />
                         <button
                           onClick={() => {
@@ -1957,6 +1962,7 @@ const ToolSettingsDialog = ({
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
 }) => {
+  const toolChoiceRef = useRef<HTMLSelectElement | null>(null);
   const [currentTools, setCurrentTools] = useState<
     { name: string; description: string; parameters: string }[]
   >(
@@ -1983,6 +1989,7 @@ const ToolSettingsDialog = ({
       open={settingsOpen}
       onClose={() => setSettingsOpen(false)}
       className="relative z-50"
+      initialFocus={toolChoiceRef}
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex w-screen items-start sm:items-center justify-center p-0 sm:p-4 max-h-dvh">
@@ -2029,6 +2036,7 @@ const ToolSettingsDialog = ({
                   }
                 }}
                 className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                ref={toolChoiceRef}
               >
                 <option value="auto">Auto</option>
                 <option value="none">None</option>
@@ -2068,6 +2076,7 @@ const ToolSettingsDialog = ({
                               );
                             }}
                             placeholder="Tool name"
+                            autoFocus={tool.name === ""}
                           />
                           <button
                             onClick={() => {
