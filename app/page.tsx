@@ -676,7 +676,7 @@ const ChatMessage = ({
                     key={index}
                     className="flex flex-col ring ring-slate-200 rounded-lg group-hover:ring-slate-300 bg-white focus-within:ring-emerald-600 focus-within:ring-1 overflow-hidden"
                   >
-                    <div className="flex justify-between gap-2 bg-gray-200">
+                    <div className="flex justify-between gap-2 bg-slate-100">
                       <input
                         type="text"
                         placeholder="Enter selected tool name here."
@@ -1808,10 +1808,10 @@ const ToolSettings = ({
                   className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-400 rounded-lg ring-1 overflow-hidden"
                 >
                   <div className="flex flex-col relative">
-                    <div className="flex flex-col bg-slate-200 p-2">
+                    <div className="flex flex-col bg-slate-100 p-2">
                       <div className="flex justify-between">
                         <input
-                          className="border-none focus:ring-0 focus:border-none bg-transparent font-bold p-0 flex-1"
+                          className="border-none focus:ring-0 focus:border-none bg-transparent p-0 flex-1"
                           value={tool.name}
                           onChange={(e) => {
                             setCurrentTools(
@@ -2058,10 +2058,10 @@ const ToolSettingsDialog = ({
                     className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-400 rounded-lg ring-1 overflow-hidden"
                   >
                     <div className="flex flex-col relative">
-                      <div className="flex flex-col bg-slate-200 p-2">
+                      <div className="flex flex-col bg-slate-100 p-2">
                         <div className="flex justify-between">
                           <input
-                            className="border-none focus:ring-0 focus:border-none bg-transparent font-bold p-0 flex-1"
+                            className="border-none focus:ring-0 focus:border-none bg-transparent p-0 flex-1"
                             value={tool.name}
                             onChange={(e) => {
                               setCurrentTools(
