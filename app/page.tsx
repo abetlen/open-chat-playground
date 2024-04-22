@@ -699,7 +699,7 @@ const ChatMessage = ({
                           };
                           setMessage(newMessage);
                         }}
-                        autoFocus={true}
+                        autoFocus={toolCall.function.name === ""}
                       />
                       <button
                         title="Delete tool call"
