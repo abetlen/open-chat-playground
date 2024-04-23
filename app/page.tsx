@@ -893,7 +893,7 @@ const ChatMessage = ({
   );
 };
 
-const CopyButton = ({ value }: { value: string }) => {
+const CopyButton = ({ value }: { value: string | (() => string) }) => {
   const [copied, setCopied] = useState(false);
   useEffect(() => {
     if (copied) {
@@ -908,7 +908,7 @@ const CopyButton = ({ value }: { value: string }) => {
       className="focus:outline-none"
       onClick={async () => {
         setCopied(true);
-        await copyToClipboard(value);
+        await copyToClipboard(typeof value === "function" ? value() : value);
       }}
       title="Copy to clipboard"
     >
@@ -2172,6 +2172,42 @@ const ToolSettingsDialog = ({
   );
 };
 
+const getCopyUrl = ({
+  messages,
+  tools,
+  toolChoice,
+  settings,
+}: {
+  messages: ChatCompletionMessageParam[];
+  tools: ChatCompletionTool[];
+  toolChoice: ChatCompletionToolChoiceOption;
+  settings: Settings;
+}) => {
+  const baseUrl =
+    window.location.protocol +
+    "//" +
+    window.location.host +
+    window.location.pathname;
+  let url = `${baseUrl}/?`;
+  // copy messages if different than INITIAL_MESSAGES
+  if (JSON.stringify(messages) !== JSON.stringify(INITIAL_MESSAGES)) {
+    url += `messages=${encodeURIComponent(JSON.stringify(messages))}&`;
+  }
+  // copy tools if different than INITIAL_TOOLS
+  if (JSON.stringify(tools) !== JSON.stringify(INITIAL_TOOLS)) {
+    url += `tools=${encodeURIComponent(JSON.stringify(tools))}&`;
+  }
+  // copy tool choice if different than INITIAL_TOOL_CHOICE
+  if (JSON.stringify(toolChoice) !== JSON.stringify(INITIAL_TOOL_CHOICE)) {
+    url += `tool_choice=${encodeURIComponent(JSON.stringify(toolChoice))}&`;
+  }
+  // copy settings if different than INITIAL_SETTINGS
+  if (JSON.stringify(settings) !== JSON.stringify(INITIAL_SETTINGS)) {
+    url += `settings=${encodeURIComponent(JSON.stringify(settings))}`;
+  }
+  return url;
+};
+
 const ShowScrollToBottom = ({
   elementRef,
   children,
@@ -2584,7 +2620,11 @@ export default function Home() {
             </p>
           </div>
           <div className="flex gap-2">
-            <CopyButton value={JSON.stringify(messages, null, 2)} />
+            <CopyButton
+              value={() =>
+                getCopyUrl({ messages, tools, toolChoice, settings })
+              }
+            />
             <button
               onClick={() => setSamplingSettingsOpen(!samplingSettingsOpen)}
               className="focus:outline-none block lg:hidden"
