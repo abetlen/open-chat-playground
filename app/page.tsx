@@ -2239,7 +2239,7 @@ const ErrorToast = ({
 };
 
 const getInitialMessagesFromParams = (params: URLSearchParams) => {
-  const initialMessagesParam = params.get("initialMessages");
+  const initialMessagesParam = params.get("messages");
   let initialMessages = INITIAL_MESSAGES;
   if (initialMessagesParam) {
     try {
@@ -2252,7 +2252,7 @@ const getInitialMessagesFromParams = (params: URLSearchParams) => {
 };
 
 const getInitialToolsFromParams = (params: URLSearchParams) => {
-  const initialToolsParam = params.get("initialTools");
+  const initialToolsParam = params.get("tools");
   let initialTools = INITIAL_TOOLS;
   if (initialToolsParam) {
     try {
@@ -2265,7 +2265,7 @@ const getInitialToolsFromParams = (params: URLSearchParams) => {
 };
 
 const getInitialToolChoiceFromParams = (params: URLSearchParams) => {
-  const initialToolChoiceParam = params.get("initialToolChoice");
+  const initialToolChoiceParam = params.get("tool_choice");
   let initialToolChoice = INITIAL_TOOL_CHOICE;
   if (initialToolChoiceParam) {
     try {
@@ -2278,7 +2278,7 @@ const getInitialToolChoiceFromParams = (params: URLSearchParams) => {
 };
 
 const getInitialSettingsFromParams = (params: URLSearchParams) => {
-  const initialSettingsParam = params.get("initialSettings");
+  const initialSettingsParam = params.get("settings");
   let initialSettings = INITIAL_SETTINGS;
   if (initialSettingsParam) {
     try {
