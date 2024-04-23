@@ -248,6 +248,7 @@ const INITIAL_TOOL_CHOICE: ChatCompletionToolChoiceOption = "auto";
 
 const INITIAL_MESSAGES: ChatCompletionMessageParam[] = [
   { role: "system", content: "You are a helpful assistant" },
+  { role: "user", content: "" },
   // { role: "user", content: "What is the capital of France?" },
   // { role: "assistant", content: "Paris is the capital of France." },
   // {
