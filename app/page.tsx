@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import {
   MinusCircle,
@@ -2237,12 +2238,75 @@ const ErrorToast = ({
   );
 };
 
+const getInitialMessagesFromParams = (params: URLSearchParams) => {
+  const initialMessagesParam = params.get("initialMessages");
+  let initialMessages = INITIAL_MESSAGES;
+  if (initialMessagesParam) {
+    try {
+      initialMessages = JSON.parse(initialMessagesParam);
+    } catch (error) {
+      console.error("Error parsing initialMessages query parameter:", error);
+    }
+  }
+  return initialMessages;
+};
+
+const getInitialToolsFromParams = (params: URLSearchParams) => {
+  const initialToolsParam = params.get("initialTools");
+  let initialTools = INITIAL_TOOLS;
+  if (initialToolsParam) {
+    try {
+      initialTools = JSON.parse(initialToolsParam);
+    } catch (error) {
+      console.error("Error parsing initialTools query parameter:", error);
+    }
+  }
+  return initialTools;
+};
+
+const getInitialToolChoiceFromParams = (params: URLSearchParams) => {
+  const initialToolChoiceParam = params.get("initialToolChoice");
+  let initialToolChoice = INITIAL_TOOL_CHOICE;
+  if (initialToolChoiceParam) {
+    try {
+      initialToolChoice = JSON.parse(initialToolChoiceParam);
+    } catch (error) {
+      console.error("Error parsing initialToolChoice query parameter:", error);
+    }
+  }
+  return initialToolChoice;
+};
+
+const getInitialSettingsFromParams = (params: URLSearchParams) => {
+  const initialSettingsParam = params.get("initialSettings");
+  let initialSettings = INITIAL_SETTINGS;
+  if (initialSettingsParam) {
+    try {
+      initialSettings = {
+        ...initialSettings,
+        ...JSON.parse(initialSettingsParam),
+      };
+    } catch (error) {
+      console.error("Error parsing initialSettings query parameter:", error);
+    }
+  }
+  return initialSettings;
+};
+
 export default function Home() {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
-  const [tools, setTools] = useState<ChatCompletionTool[]>(INITIAL_TOOLS);
-  const [toolChoice, setToolChoice] =
-    useState<ChatCompletionToolChoiceOption>(INITIAL_TOOL_CHOICE);
-  const [settings, setSettings] = useState<Settings>(INITIAL_SETTINGS);
+  const queryParams = useSearchParams();
+  const [messages, setMessages] = useState(
+    getInitialMessagesFromParams(queryParams)
+  );
+  const [tools, setTools] = useState<ChatCompletionTool[]>(
+    getInitialToolsFromParams(queryParams)
+  );
+  const [toolChoice, setToolChoice] = useState<ChatCompletionToolChoiceOption>(
+    getInitialToolChoiceFromParams(queryParams)
+  );
+  const [settings, setSettings] = useState<Settings>(
+    getInitialSettingsFromParams(queryParams)
+  );
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
