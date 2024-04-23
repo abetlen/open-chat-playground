@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import type { Viewport } from "next";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -27,7 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <main>{children}</main>
+        <main>
+          <Suspense>{children}</Suspense>
+        </main>
       </body>
     </html>
   );
