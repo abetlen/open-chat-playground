@@ -19,13 +19,18 @@ import {
   Image,
   Check,
   Paperclip,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 import { Dialog, Tab } from "@headlessui/react";
 
 import Markdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneLight as light } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  oneLight as light,
+  oneDark as dark,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 import remarkGfm from "remark-gfm";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
@@ -46,6 +51,7 @@ import {
 } from "openai/resources/chat/index";
 import React from "react";
 import { Stream } from "openai/streaming.mjs";
+import { useTheme } from "next-themes";
 
 const createChatCompletion = (
   messages: ChatCompletionMessageParam[],
@@ -118,7 +124,7 @@ async function copyToClipboard(textToCopy: string) {
   }
 }
 
-const reactMarkdownComponents = {
+const reactMarkdownComponents = (theme) => ({
   h1: (props: any) => {
     const { children, ...rest } = props;
     return <h1 className="text-2xl font-bold">{children}</h1>;
@@ -178,7 +184,7 @@ const reactMarkdownComponents = {
         {match ? (
           <span className="block">
             <SyntaxHighlighter
-              style={light}
+              style={theme}
               {...rest}
               PreTag="div"
               language={match[1]}
@@ -199,7 +205,7 @@ const reactMarkdownComponents = {
       </>
     );
   },
-};
+});
 
 type Settings = {
   model: string;
@@ -450,6 +456,7 @@ const ContentArea = ({
   autoFocus?: boolean;
 }) => {
   const [editing, setEditing] = useState(autoFocus || false);
+  const { theme } = useTheme();
   return (
     <>
       {editing ? (
@@ -459,7 +466,7 @@ const ContentArea = ({
             onChange(e.target.value);
           }}
           placeholder={`Enter a ${role} message here.`}
-          className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 border-none outline-none focus:border-none rounded-lg resize-none group-hover:bg-white focus:bg-white bg-transparent"
+          className="disabled:hidden block w-full text-left p-1 px-2 sm:p-2 whitespace-pre-wrap focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 border-none outline-none focus:border-none rounded-lg resize-none group-hover:bg-white dark:group-hover:bg-slate-900 focus:bg-white dark:focus:bg-slate-900 bg-transparent"
           autoFocus
           onBlur={() => {
             setEditing(false);
@@ -470,19 +477,21 @@ const ContentArea = ({
           onClick={() => {
             setEditing(true);
           }}
-          className="text-left p-1 px-2 sm:p-2 group-hover:bg-white rounded-lg cursor-text w-full"
+          className="text-left p-1 px-2 sm:p-2 group-hover:bg-white dark:group-hover:bg-slate-900 rounded-lg cursor-text w-full"
         >
           {value ? (
             <Markdown
               remarkPlugins={[remarkGfm, remarkMath]}
               rehypePlugins={[rehypeKatex]}
-              components={reactMarkdownComponents}
+              components={reactMarkdownComponents(
+                theme === "dark" ? dark : light
+              )}
               className="whitespace-pre-wrap overflow-x-auto flex flex-col gap-2"
             >
               {value}
             </Markdown>
           ) : (
-            <div className="text-slate-400">
+            <div className="text-slate-400 dark:text-slate-500">
               {`Enter a ${role} message here.`}
             </div>
           )}
@@ -558,7 +567,7 @@ const ImageEdit = ({
           {/* url input */}
           <input
             type="text"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="Enter image URL or paste image here."
@@ -566,7 +575,7 @@ const ImageEdit = ({
           />
           {/* file input */}
           <label className="p-2 cursor-pointer">
-            <Paperclip className="w-5 h-5 text-slate-600 hover:text-slate-800" />
+            <Paperclip className="w-5 h-5 text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-300" />
             <input
               type="file"
               hidden={true}
@@ -597,7 +606,7 @@ const ImageEdit = ({
               onClick={() => {
                 setEditing(false);
               }}
-              className="p-2"
+              className="p-2 dark:text-slate-400 dark:hover:text-slate-300"
             >
               <Check className="w-5 h-5" />
             </button>
@@ -607,7 +616,7 @@ const ImageEdit = ({
             onClick={() => {
               deleteImage();
             }}
-            className="p-2"
+            className="p-2 dark:text-slate-400 dark:hover:text-slate-300"
           >
             <X className="w-5 h-5" />
           </button>
@@ -627,10 +636,11 @@ const ChatMessage = ({
   deleteMessage: () => void;
 }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const { theme } = useTheme();
   return (
     <div
       ref={rootRef}
-      className="flex flex-col sm:flex-row w-full gap-1 sm:gap-2 group hover:bg-slate-200 p-1 py-2 sm:p-4 rounded-lg items-baseline grow flex-1"
+      className="flex flex-col sm:flex-row w-full gap-1 sm:gap-2 group hover:bg-slate-200 dark:hover:bg-slate-800 p-1 py-2 sm:p-4 rounded-lg items-baseline grow flex-1"
     >
       <div className="w-full sm:w-28 flex justify-between pr-1">
         <button
@@ -641,7 +651,7 @@ const ChatMessage = ({
             setMessage(newMessage);
           }}
           title="Change role"
-          className="uppercase font-bold text-left group-hover:bg-slate-300 p-1 px-2 sm:p-2 rounded-lg text-sm"
+          className="uppercase font-bold text-left group-hover:bg-slate-300 dark:group-hover:bg-slate-700 p-1 px-2 sm:p-2 rounded-lg text-sm"
         >
           {message.role}
         </button>
@@ -650,7 +660,7 @@ const ChatMessage = ({
           className="block sm:hidden"
           title="Delete message"
         >
-          <MinusCircle className="w-5 h-5 text-slate-400" />
+          <MinusCircle className="w-5 h-5 text-slate-400 dark:text-slate-600" />
         </button>
       </div>
       <span className="flex-1 w-full sm:w-auto h-full min-h-fit overflow-x-auto p-1">
@@ -676,13 +686,13 @@ const ChatMessage = ({
                 {message.tool_calls.map((toolCall, index) => (
                   <li
                     key={index}
-                    className="flex flex-col ring ring-slate-200 rounded-lg group-hover:ring-slate-300 bg-white focus-within:group-hover:ring-emerald-600 focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 overflow-hidden"
+                    className="flex flex-col ring ring-slate-200 rounded-lg group-hover:ring-slate-300 dark:group-hover:ring-slate-600 dark:ring-slate-700 bg-white dark:bg-slate-900 focus-within:group-hover:ring-emerald-600 focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 overflow-hidden"
                   >
-                    <div className="flex justify-between gap-2 bg-slate-10 border-b border-slate-300">
+                    <div className="flex justify-between gap-2 bg-slate-10 border-b border-slate-300 dark:border-slate-700">
                       <input
                         type="text"
                         placeholder="Enter selected tool name here."
-                        className="pl-3 p-1 bg-transparent border-none focus:border-none focus:ring-0 flex-1"
+                        className="pl-2 p-1 bg-transparent border-none focus:border-none focus:ring-0 flex-1"
                         value={toolCall.function.name}
                         onChange={(e) => {
                           const newMessage = {
@@ -716,7 +726,7 @@ const ChatMessage = ({
                         }}
                         className="p-2"
                       >
-                        <X className="w-5 h-5 text-slate-400 sm:text-slate-400 hover:text-slate-600 group-hover:text-slate-600" />
+                        <X className="w-5 h-5 text-slate-400 sm:text-slate-400 hover:text-slate-600 group-hover:text-slate-600 dark:hover:text-slate-400 dark:group-hover:text-slate-400" />
                       </button>
                     </div>
                     <CodeMirror
@@ -726,10 +736,11 @@ const ChatMessage = ({
                         highlightActiveLine: false,
                         highlightSelectionMatches: false,
                       }}
-                      className="p-1 py-2 bg-white border border-transparent bg-transparent text-base"
+                      className="bg-white dark:bg-slate-800 border border-transparent bg-transparent text-base"
                       extensions={[json()]}
                       placeholder="Enter selected tool call arguments here."
                       value={toolCall.function.arguments}
+                      theme={theme === "dark" ? "dark" : "light"}
                       onChange={(value) => {
                         const newMessage = {
                           ...message,
@@ -757,7 +768,7 @@ const ChatMessage = ({
               {!message.content && message.content !== "" && (
                 <button
                   title="Add text content"
-                  className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
+                  className="p-2 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-400 dark:text-slate-600 sm:text-transparent dark:sm:text-transparent group-hover:text-slate-800 dark:group-hover:text-slate-400"
                   onClick={() => {
                     const newMessage = {
                       ...message,
@@ -771,7 +782,7 @@ const ChatMessage = ({
               )}
               <button
                 title="Add tool call"
-                className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
+                className="p-2 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-400 dark:text-slate-600 sm:text-transparent dark:sm:text-transparent group-hover:text-slate-800 dark:group-hover:text-slate-400"
                 onClick={() => {
                   const newMessage = {
                     ...message,
@@ -856,7 +867,7 @@ const ChatMessage = ({
                 )) && (
                 <button
                   title="Add image content"
-                  className="p-2 rounded-lg hover:bg-slate-300 flex items-center justify-center font-bold text-slate-400 sm:text-transparent group-hover:text-slate-800"
+                  className="p-2 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-400 dark:text-slate-600 sm:text-transparent dark:sm:text-transparent group-hover:text-slate-800 dark:group-hover:text-slate-400"
                   onClick={() => {
                     const newMessage = {
                       ...message,
@@ -887,7 +898,7 @@ const ChatMessage = ({
         </div>
       </span>
       <button onClick={deleteMessage} className="w-4 hidden sm:block">
-        <MinusCircle className="w-4 h-4 text-transparent group-hover:text-slate-600" />
+        <MinusCircle className="w-4 h-4 text-transparent group-hover:text-slate-600 dark:group-hover:text-slate-400" />
       </button>
     </div>
   );
@@ -915,7 +926,7 @@ const CopyButton = ({ value }: { value: string | (() => string) }) => {
       {copied ? (
         <ClipboardCheck className="w-5 h-5" />
       ) : (
-        <Clipboard className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+        <Clipboard className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-400" />
       )}
     </button>
   );
@@ -942,20 +953,20 @@ const SettingsDialog = ({
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex w-screen items-start sm:items-center justify-center p-0 sm:p-4 max-h-dvh">
-        <Dialog.Panel className="shadow-xl rounded-b-lg sm:rounded-lg p-4 border max-w-none sm:max-w-xl w-full gap-2 bg-white max-h-full flex flex-col">
+        <Dialog.Panel className="shadow-xl rounded-b-lg sm:rounded-lg p-4 border max-w-none sm:max-w-xl w-full gap-2 bg-white dark:bg-slate-900 max-h-full flex flex-col">
           <div>
             <div className="w-full flex justify-between">
               <Dialog.Title className="font-bold text-lg">
                 Settings
               </Dialog.Title>
               <button
-                className="focus:outline-none text-slate-600 hover:text-slate-800"
+                className="focus:outline-none text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-400"
                 onClick={() => setSettingsOpen(false)}
               >
-                <X className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+                <X className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-400" />
               </button>
             </div>
-            <Dialog.Description className="text-slate-500">
+            <Dialog.Description className="text-slate-500 dark:text-slate-400">
               Configure settings for the chat playground.
             </Dialog.Description>
           </div>
@@ -973,7 +984,7 @@ const SettingsDialog = ({
                 value={baseURL.value}
                 onChange={(e) => baseURL.setValue(e.target.value)}
                 type="url"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Enter the base URL for the server or leave blank for OpenAI"
                 ref={baseURLRef}
               />
@@ -990,7 +1001,7 @@ const SettingsDialog = ({
                 value={apiKey.value}
                 onChange={(e) => apiKey.setValue(e.target.value)}
                 type="password"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Enter the API key for the OpenAI API"
               />
             </div>
@@ -1082,7 +1093,7 @@ const SamplingSettings = ({
         <div className="flex justify-between">
           <div className="font-bold text-lg">Parameters</div>
         </div>
-        <p className="text-slate-500">
+        <p className="text-slate-500 dark:text-slate-400">
           Configure parameters for chat completion requests.
         </p>
       </div>
@@ -1100,7 +1111,7 @@ const SamplingSettings = ({
             value={model}
             onChange={(e) => setModel(e.target.value)}
             type="text"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             placeholder="Model name"
           />
         </div>
@@ -1117,7 +1128,7 @@ const SamplingSettings = ({
             value={seed}
             onChange={(e) => setSeed(parseInt(e.target.value))}
             type="number"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             placeholder="Seed value. Enter -1 for random."
           />
         </div>
@@ -1134,7 +1145,7 @@ const SamplingSettings = ({
             value={temperature}
             onChange={(e) => setTemperature(parseFloat(e.target.value))}
             type="number"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             placeholder="Sampling temperature. Enter 0 for deterministic decoding."
           />
         </div>
@@ -1151,7 +1162,7 @@ const SamplingSettings = ({
             value={topP}
             onChange={(e) => setTopP(parseFloat(e.target.value))}
             type="number"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             placeholder="Enter the top p for the OpenAI API"
           />
         </div>
@@ -1168,7 +1179,7 @@ const SamplingSettings = ({
             value={frequencyPenalty}
             onChange={(e) => setFrequencyPenalty(parseFloat(e.target.value))}
             type="number"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             placeholder="Enter the frequency penalty for the OpenAI API"
           />
         </div>
@@ -1176,7 +1187,7 @@ const SamplingSettings = ({
         <div className="w-full flex flex-col gap-2">
           <label
             htmlFor={presencePenaltyId}
-            className="text-slate-800 dark:text-slate-4000 text-sm font-bold"
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
           >
             Presence Penalty
           </label>
@@ -1185,7 +1196,7 @@ const SamplingSettings = ({
             value={presencePenalty}
             onChange={(e) => setPresencePenalty(parseFloat(e.target.value))}
             type="number"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             placeholder="Enter the presence penalty for the OpenAI API"
           />
         </div>
@@ -1202,21 +1213,21 @@ const SamplingSettings = ({
             value={maxTokens}
             onChange={(e) => setMaxTokens(parseInt(e.target.value))}
             type="number"
-            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             placeholder="Maximum number of tokens to generate. Enter -1 for no limit."
           />
         </div>
         {/* stop */}
         <div className="w-full flex flex-col gap-2">
           <label
-            htmlFor={stopId}
+            // htmlFor={stopId}
             className="text-slate-800 dark:text-slate-400 text-sm font-bold"
           >
             Stop Sequences
           </label>
           <div className="flex">
             <form
-              id={stopId}
+              // id={stopId}
               onSubmit={(e) => {
                 e.preventDefault();
                 if (stopSequence === "") {
@@ -1235,13 +1246,13 @@ const SamplingSettings = ({
                 value={stopSequence}
                 onChange={(e) => setStopSequence(e.target.value)}
                 type="text"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Stop sequence used to stop generation."
               />
               <button
                 type="submit"
                 disabled={stopSequence === ""}
-                className="p-1 sm:p-2 focus:outline-none focus:ring-none rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 disabled:bg-slate-100"
+                className="p-1 sm:p-2 focus:outline-none focus:ring-none rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 disabled:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-400"
               >
                 <Plus className="w-5 h-5" />
               </button>
@@ -1251,7 +1262,7 @@ const SamplingSettings = ({
             {stop.map((stopSequence, index) => (
               <div
                 key={index}
-                className="text-slate-800 bg-slate-200 rounded-lg text-sm"
+                className="text-slate-800 bg-slate-200 rounded-lg text-sm dark:text-slate-400 dark:bg-slate-700"
               >
                 <button
                   onClick={() => {
@@ -1259,7 +1270,7 @@ const SamplingSettings = ({
                       setStop(stop.filter((_, i) => i !== index));
                     }
                   }}
-                  className="p-1 sm:p-2 focus:ring-none rounded-lg border border-none focus:border-none flex items-center gap-1 hover:text-slate-900"
+                  className="p-1 sm:p-2 focus:ring-none rounded-lg border border-none focus:border-none flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-400"
                 >
                   {stopSequence}
                   <X className="w-4 h-4" />
@@ -1282,7 +1293,7 @@ const SamplingSettings = ({
               checked={jsonMode}
               onChange={(e) => setJsonMode(e.target.checked)}
               type="checkbox"
-              className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
+              className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:checked:bg-emerald-600"
               placeholder="Enter the model for the OpenAI API"
             />
             <label htmlFor={jsonModeId} className="text-sm">
@@ -1304,7 +1315,7 @@ const SamplingSettings = ({
               checked={stream}
               onChange={(e) => setStream(e.target.checked)}
               type="checkbox"
-              className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
+              className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:checked:bg-emerald-600"
             />
             <label htmlFor={streamId} className="text-sm">
               Enabled
@@ -1431,20 +1442,20 @@ const SamplingSettingsDialog = ({
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex w-screen items-start sm:items-center justify-center p-0 sm:p-4 max-h-dvh">
-        <Dialog.Panel className="shadow-xl rounded-b-lg sm:rounded-lg border max-w-none sm:max-w-xl w-full bg-white p-4 gap-2 flex flex-col max-h-dvh">
+        <Dialog.Panel className="shadow-xl rounded-b-lg sm:rounded-lg border max-w-none sm:max-w-xl w-full bg-white dark:bg-slate-900 p-4 gap-2 flex flex-col max-h-dvh">
           <div>
             <div className="flex justify-between">
               <Dialog.Title className="font-bold text-lg">
                 Parameters
               </Dialog.Title>
               <button
-                className="focus:outline-none text-slate-600 hover:text-slate-800"
+                className="focus:outline-none text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-400"
                 onClick={() => setSettingsOpen(false)}
               >
-                <X className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+                <X className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-400" />
               </button>
             </div>
-            <Dialog.Description className="text-slate-500">
+            <Dialog.Description className="text-slate-500 dark:text-slate-400">
               Configure parameters for chat completion requests.
             </Dialog.Description>
           </div>
@@ -1463,7 +1474,7 @@ const SamplingSettingsDialog = ({
                 ref={modelRef}
                 onChange={(e) => setModel(e.target.value)}
                 type="text"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Model name"
               />
             </div>
@@ -1480,7 +1491,7 @@ const SamplingSettingsDialog = ({
                 value={seed}
                 onChange={(e) => setSeed(parseInt(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-7000 dark:bg-slate-900"
                 placeholder="Seed value. Enter -1 for random."
               />
             </div>
@@ -1497,7 +1508,7 @@ const SamplingSettingsDialog = ({
                 value={temperature}
                 onChange={(e) => setTemperature(parseFloat(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Sampling temperature. Enter 0 for deterministic decoding."
               />
             </div>
@@ -1514,7 +1525,7 @@ const SamplingSettingsDialog = ({
                 value={topP}
                 onChange={(e) => setTopP(parseFloat(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Enter the top p for the OpenAI API"
               />
             </div>
@@ -1533,7 +1544,7 @@ const SamplingSettingsDialog = ({
                   setFrequencyPenalty(parseFloat(e.target.value))
                 }
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Enter the frequency penalty for the OpenAI API"
               />
             </div>
@@ -1541,7 +1552,7 @@ const SamplingSettingsDialog = ({
             <div className="w-full flex flex-col gap-2">
               <label
                 htmlFor={presencePenaltyId}
-                className="text-slate-800 dark:text-slate-4000 text-sm font-bold"
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Presence Penalty
               </label>
@@ -1550,7 +1561,7 @@ const SamplingSettingsDialog = ({
                 value={presencePenalty}
                 onChange={(e) => setPresencePenalty(parseFloat(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Enter the presence penalty for the OpenAI API"
               />
             </div>
@@ -1567,21 +1578,21 @@ const SamplingSettingsDialog = ({
                 value={maxTokens}
                 onChange={(e) => setMaxTokens(parseInt(e.target.value))}
                 type="number"
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 placeholder="Maximum number of tokens to generate. Enter -1 for no limit."
               />
             </div>
             {/* stop */}
             <div className="w-full flex flex-col gap-2">
               <label
-                htmlFor={stopId}
+                // htmlFor={stopId}
                 className="text-slate-800 dark:text-slate-400 text-sm font-bold"
               >
                 Stop Sequences
               </label>
               <div className="flex">
                 <form
-                  id={stopId}
+                  // id={stopId}
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (stopSequence === "") {
@@ -1600,13 +1611,13 @@ const SamplingSettingsDialog = ({
                     value={stopSequence}
                     onChange={(e) => setStopSequence(e.target.value)}
                     type="text"
-                    className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                    className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                     placeholder="Stop sequence used to stop generation."
                   />
                   <button
                     type="submit"
                     disabled={stopSequence === ""}
-                    className="p-1 sm:p-2 focus:outline-none focus:ring-none rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 disabled:bg-slate-100"
+                    className="p-1 sm:p-2 focus:outline-none focus:ring-none rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 disabled:bg-slate-100 dark:bg-slate-700 dark:hover:bg-slate-600 dark:text-slate-400"
                   >
                     <Plus className="w-5 h-5" />
                   </button>
@@ -1616,7 +1627,7 @@ const SamplingSettingsDialog = ({
                 {stop.map((stopSequence, index) => (
                   <div
                     key={index}
-                    className="text-slate-800 bg-slate-200 rounded-lg text-sm"
+                    className="text-slate-800 bg-slate-200 rounded-lg text-sm dark:text-slate-400 dark:bg-slate-700"
                   >
                     <button
                       onClick={() => {
@@ -1624,7 +1635,7 @@ const SamplingSettingsDialog = ({
                           setStop(stop.filter((_, i) => i !== index));
                         }
                       }}
-                      className="p-1 sm:p-2 focus:ring-none rounded-lg border border-none focus:border-none flex items-center gap-1 hover:text-slate-900"
+                      className="p-1 sm:p-2 focus:ring-none rounded-lg border border-none focus:border-none flex items-center gap-1 hover:text-slate-900 dark:hover:text-slate-400"
                     >
                       {stopSequence}
                       <X className="w-4 h-4" />
@@ -1647,7 +1658,7 @@ const SamplingSettingsDialog = ({
                   checked={jsonMode}
                   onChange={(e) => setJsonMode(e.target.checked)}
                   type="checkbox"
-                  className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
+                  className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:checked:bg-emerald-600"
                   placeholder="Enter the model for the OpenAI API"
                 />
                 <label htmlFor={jsonModeId} className="text-sm">
@@ -1669,7 +1680,7 @@ const SamplingSettingsDialog = ({
                   checked={stream}
                   onChange={(e) => setStream(e.target.checked)}
                   type="checkbox"
-                  className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200"
+                  className="p-1 sm:p-2 focus:ring-emerald-600 text-emerald-600 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-700 dark:checked:bg-emerald-600"
                 />
                 <label htmlFor={streamId} className="text-sm">
                   Enabled
@@ -1717,6 +1728,7 @@ const ToolSettings = ({
       parameters: JSON.stringify(tool.function.parameters, null, 2) ?? "",
     }))
   );
+  const { theme } = useTheme();
   const saveToolSettings = () => {
     const tools_parsed = currentTools.map((tool) => ({
       type: "function" as const,
@@ -1788,7 +1800,7 @@ const ToolSettings = ({
                   }
                 }
               }}
-              className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+              className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
             >
               <option value="auto">Auto</option>
               <option value="none">None</option>
@@ -1807,10 +1819,10 @@ const ToolSettings = ({
               {currentTools.map((tool, index) => (
                 <li
                   key={index}
-                  className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-300 rounded-lg ring-1 overflow-hidden"
+                  className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-300 dark:ring-slate-700 rounded-lg ring-1 overflow-hidden"
                 >
                   <div className="flex flex-col relative">
-                    <div className="flex flex-col bg-slate-100 border-b border-slate-300 p-2">
+                    <div className="flex flex-col bg-slate-100 border-b border-slate-300 p-2 dark:bg-slate-900 dark:border-slate-700">
                       <div className="flex justify-between">
                         <input
                           className="border-none focus:ring-0 focus:border-none bg-transparent p-0 flex-1"
@@ -1870,10 +1882,11 @@ const ToolSettings = ({
                             highlightActiveLine: false,
                             highlightSelectionMatches: false,
                           }}
-                          className="rounded-lg p-0 bg-white text-base py-2"
+                          className="rounded-lg p-0 bg-white dark:bg-slate-900 text-base"
                           extensions={[json()]}
                           value={tool.parameters}
                           placeholder="Tool parameters (OpenAPI JSON)"
+                          theme={theme === "dark" ? "dark" : "light"}
                           onChange={(value) => {
                             setCurrentTools(
                               currentTools.map((t, i) =>
@@ -1899,7 +1912,7 @@ const ToolSettings = ({
                   },
                 ])
               }
-              className="px-2 py-1 sm:py-4 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
+              className="px-2 py-1 sm:py-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-2 w-full font-bold"
             >
               <PlusCircle className="w-5 h-5" />
               Add Tool
@@ -1995,18 +2008,18 @@ const ToolSettingsDialog = ({
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <div className="fixed inset-0 flex w-screen items-start sm:items-center justify-center p-0 sm:p-4 max-h-dvh">
-        <Dialog.Panel className="shadow-xl rounded-b-lg sm:rounded-lg border max-w-none sm:max-w-xl w-full bg-white p-4 gap-2 flex flex-col max-h-dvh">
+        <Dialog.Panel className="shadow-xl rounded-b-lg sm:rounded-lg border max-w-none sm:max-w-xl w-full bg-white dark:bg-slate-900 p-4 gap-2 flex flex-col max-h-dvh">
           <div>
             <div className="flex justify-between">
               <Dialog.Title className="font-bold text-lg">Tools</Dialog.Title>
               <button
-                className="focus:outline-none text-slate-600 hover:text-slate-800"
+                className="focus:outline-none text-slate-600 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-400"
                 onClick={() => setSettingsOpen(false)}
               >
-                <X className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+                <X className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-400" />
               </button>
             </div>
-            <Dialog.Description className="text-slate-500">
+            <Dialog.Description className="text-slate-500 dark:text-slate-400">
               Configure tools.
             </Dialog.Description>
           </div>
@@ -2037,7 +2050,7 @@ const ToolSettingsDialog = ({
                     }
                   }
                 }}
-                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
                 ref={toolChoiceRef}
               >
                 <option value="auto">Auto</option>
@@ -2057,10 +2070,10 @@ const ToolSettingsDialog = ({
                 {currentTools.map((tool, index) => (
                   <li
                     key={index}
-                    className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-300 rounded-lg ring-1 overflow-hidden"
+                    className="focus-within:ring-emerald-600 focus-within:ring-1 sm:focus-within:ring-2 ring-slate-300 dark:ring-slate-700 rounded-lg ring-1 overflow-hidden"
                   >
                     <div className="flex flex-col relative">
-                      <div className="flex flex-col bg-slate-100 border-b border-slate-300 p-2">
+                      <div className="flex flex-col bg-slate-100 border-b border-slate-300 p-2 dark:bg-slate-900 dark:border-slate-700">
                         <div className="flex justify-between">
                           <input
                             className="border-none focus:ring-0 focus:border-none bg-transparent p-0 flex-1"
@@ -2120,7 +2133,7 @@ const ToolSettingsDialog = ({
                               highlightActiveLine: false,
                               highlightSelectionMatches: false,
                             }}
-                            className="rounded-lg p-0 bg-white text-base py-2"
+                            className="rounded-lg p-0 bg-white dark:bg-slate-800 text-base"
                             extensions={[json()]}
                             value={tool.parameters}
                             placeholder="Tool parameters (OpenAPI JSON)"
@@ -2149,7 +2162,7 @@ const ToolSettingsDialog = ({
                     },
                   ])
                 }
-                className="px-2 py-1 sm:py-4 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
+                className="px-2 py-1 sm:py-4 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-2 w-full font-bold"
               >
                 <PlusCircle className="w-5 h-5" />
                 Add Tool
@@ -2358,6 +2371,8 @@ export default function Home() {
   const messageContainerRef = useRef<HTMLDivElement>(null);
   const messagesContainerBottomRef = useRef<HTMLButtonElement>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [darkMode, setDarkMode] = useState(false);
+  const { theme, setTheme } = useTheme();
   const deleteMessage = (index: number) => {
     const newMessages = [...messages];
     newMessages.splice(index, 1);
@@ -2585,7 +2600,7 @@ export default function Home() {
   }, []);
   return (
     <div
-      className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-4 bg-stone-200 dark:bg-slate-800 relative overflow-hidden"
+      className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-4 bg-stone-200 dark:bg-slate-800 relative overflow-hidden text-slate-800 dark:text-slate-200"
       onKeyDown={(e) => {
         // ctr+enter sends message
         if (e.key === "Enter" && e.ctrlKey) {
@@ -2595,8 +2610,8 @@ export default function Home() {
       autoFocus
       tabIndex={0}
     >
-      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-screen-2xl w-full bg-stone-50 overflow-hidden">
-        <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 sm:border-none flex justify-between items-center sm:items-baseline overflow-hidden">
+      <div className="p-1 sm:p-4 flex flex-col border rounded-none sm:rounded-lg shadow-lg grow max-w-screen-2xl w-full bg-stone-50 dark:bg-slate-900 overflow-hidden">
+        <div className="w-full py-3 pl-3 pr-2 sm:pl-6 sm:pr-3 pb-4 border-b border-slate-200 dark:border-slate-700 sm:border-none flex justify-between items-center sm:items-baseline overflow-hidden">
           <div className="flex flex-col">
             <h1 className="text-lg font-bold">Open Chat Playground</h1>
             <p className="text-slate-500 dark:text-slate-400 hidden sm:block">
@@ -2620,6 +2635,23 @@ export default function Home() {
             </p>
           </div>
           <div className="flex gap-2">
+            {theme === "dark" ? (
+              <button
+                onClick={() => setTheme("light")}
+                className="focus:outline-none"
+                title="Light mode"
+              >
+                <Sun className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-400" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setTheme("dark")}
+                className="focus:outline-none"
+                title="Dark mode"
+              >
+                <Moon className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-400" />
+              </button>
+            )}
             <CopyButton
               value={() =>
                 getCopyUrl({ messages, tools, toolChoice, settings })
@@ -2630,21 +2662,21 @@ export default function Home() {
               className="focus:outline-none block lg:hidden"
               title="Parameters"
             >
-              <Settings2 className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+              <Settings2 className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-400" />
             </button>
             <button
               onClick={() => setToolSettingsOpen(!toolSettingsOpen)}
               className="focus:outline-none block lg:hidden"
               title="Tools"
             >
-              <Wrench className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+              <Wrench className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-400" />
             </button>
             <button
               onClick={() => setSettingsOpen(!settingsOpen)}
               className="focus:outline-none"
               title="Settings"
             >
-              <Settings className="w-5 h-5 text-slate-500 hover:text-slate-800" />
+              <Settings className="w-5 h-5 text-slate-500 hover:text-slate-800 dark:hover:text-slate-400" />
             </button>
           </div>
         </div>
@@ -2655,7 +2687,7 @@ export default function Home() {
                 className="flex flex-col items-start gap-2 pb-4 w-full overflow-y-auto"
                 ref={messageContainerRef}
               >
-                <ul className="flex flex-col w-full divide-y divide-slate-200">
+                <ul className="flex flex-col w-full divide-y divide-slate-200 dark:divide-slate-700">
                   {messages.map((message, index) => {
                     return (
                       <li key={index} className="flex-1">
@@ -2679,7 +2711,7 @@ export default function Home() {
                 <button
                   ref={messagesContainerBottomRef}
                   onClick={addNewMessage}
-                  className="p-1 sm:p-4 px-3 sm:px-6 rounded-lg hover:bg-slate-200 flex items-center gap-2 w-full font-bold"
+                  className="p-1 sm:p-4 px-3 sm:px-6 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center gap-2 w-full font-bold"
                 >
                   <PlusCircle className="w-4 h-4" />
                   Add message
@@ -2691,7 +2723,7 @@ export default function Home() {
               >
                 <div className="bottom-0 left-0 right-0 w-full absolute flex items-center justify-center pb-2">
                   <button
-                    className="px-2 py-2 w-auto rounded-full bg-white hover:bg-slate-100 text-slate-800 font-bold focus:outline-none border border-slate-200 shadow flex"
+                    className="px-2 py-2 w-auto rounded-full bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-800 dark:text-slate-400 font-bold focus:outline-none border border-slate-200 dark:border-slate-700 shadow flex"
                     onClick={() => {
                       messagesContainerBottomRef.current?.scrollIntoView({
                         behavior: "instant",
@@ -2705,7 +2737,7 @@ export default function Home() {
             </div>
 
             {/* section: send button, stop button, tool choice, completion metrics */}
-            <div className="px-0 sm:px-4 pt-2 border-t border-slate-200 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
+            <div className="px-0 sm:px-4 pt-2 border-t border-slate-200 dark:border-slate-700 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
               {abortController && (
                 <button
                   onClick={() => abortController.abort()}
@@ -2746,7 +2778,7 @@ export default function Home() {
                       }
                     }
                   }}
-                  className="w-auto min-w-[14rem] p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200"
+                  className="w-auto min-w-[14rem] p-1 sm:p-2 focus:ring-emerald-600 focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-800"
                 >
                   <option value="auto">Auto</option>
                   <option value="none">None</option>
@@ -2814,13 +2846,13 @@ export default function Home() {
           <div className="hidden lg:flex flex-col max-w-md w-full overflow-hidden">
             <Tab.Group>
               <span className="px-2 flex">
-                <Tab.List className="bg-slate-200 p-1 rounded-lg font-bold flex w-full">
+                <Tab.List className="bg-slate-200 dark:bg-slate-800 p-1 rounded-lg font-bold flex w-full">
                   <Tab
                     className={({ selected }) =>
                       "flex-1 focus:outline-none py-1 px-4 " +
                       (selected
-                        ? "bg-white rounded-lg shadow text-slate-800"
-                        : "bg-transparent text-slate-500")
+                        ? "bg-white dark:bg-slate-900 rounded-lg shadow text-slate-800 dark:text-slate-200"
+                        : "bg-transparent text-slate-500 dark:text-slate-400")
                     }
                   >
                     Parameters
@@ -2829,8 +2861,8 @@ export default function Home() {
                     className={({ selected }) =>
                       "flex-1 focus:outline-none py-1 px-4 " +
                       (selected
-                        ? "bg-white rounded-lg shadow text-slate-800"
-                        : "bg-transparent text-slate-500")
+                        ? "bg-white dark:bg-slate-900 rounded-lg shadow text-slate-800 dark:text-slate-200"
+                        : "bg-transparent text-slate-500 dark:text-slate-400")
                     }
                   >
                     Tools
