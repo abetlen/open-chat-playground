@@ -1327,7 +1327,7 @@ const SamplingSettings = ({
       </div>
       <div className="flex gap-2">
         <button
-          className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 disabled:text-slate-800 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+          className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-800 dark:disabled:text-slate-400 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
           onClick={() => {
             save();
           }}
@@ -1351,7 +1351,7 @@ const SamplingSettings = ({
           Save
         </button>
         <button
-          className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-100 disabled:text-slate-400 bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 focus:outline-none"
+          className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-100 dark:disabled:bg-slate-500 disabled:text-slate-400 dark:disabled:text-slate-800 bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 focus:outline-none"
           onClick={() => {
             reset();
           }}
@@ -1923,7 +1923,7 @@ const ToolSettings = ({
         </div>
         <div className="flex gap-2">
           <button
-            className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 disabled:text-slate-800 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+            className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-800 dark:disabled:text-slate-400 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
             onClick={() => {
               saveToolSettings();
             }}
@@ -1943,7 +1943,7 @@ const ToolSettings = ({
           </button>
           <button
             onClick={reset}
-            className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-100 disabled:text-slate-400 bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 focus:outline-none"
+            className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-100 dark:disabled:bg-slate-500 disabled:text-slate-400 dark:disabled:text-slate-800 bg-slate-200 text-slate-800 font-bold hover:bg-slate-300 focus:outline-none"
             disabled={
               currentTools.length === tools.length &&
               currentTools.every(
@@ -2752,7 +2752,7 @@ export default function Home() {
             </div>
 
             {/* section: send button, stop button, tool choice, completion metrics */}
-            <div className="px-0 sm:px-4 pt-2 border-t border-slate-200 dark:border-slate-700 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
+            <div className="px-1 sm:px-4 pt-2 pb-1 border-t border-slate-200 dark:border-slate-700 sm:border-none flex flex-col-reverse sm:flex-row gap-2">
               {abortController && (
                 <button
                   onClick={() => abortController.abort()}
