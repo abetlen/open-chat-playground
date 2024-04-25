@@ -16,6 +16,7 @@ It provides a few additional features over OpenAI's Chat Playground including:
 - Tool Calling
 - Image Content
 - Ability to call other backends
+- Dark Mode
 
 Try out the [hosted version](https://abetlen.github.io/open-chat-playground)
 
