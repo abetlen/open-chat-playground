@@ -2602,6 +2602,17 @@ export default function Home() {
       console.log("Service Worker not supported");
     }
   }, []);
+  useEffect(() => {
+    if (theme === "dark") {
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute("content", "#0f172a");
+    } else {
+      document
+        .querySelector('meta[name="theme-color"]')
+        ?.setAttribute("content", "#fafaf9");
+    }
+  }, [theme]);
   return (
     <div
       className="flex h-dvh flex-col items-center justify-between p-0 sm:p-2 lg:p-4 bg-stone-200 dark:bg-slate-800 relative overflow-hidden text-slate-800 dark:text-slate-200"
