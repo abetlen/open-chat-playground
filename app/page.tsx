@@ -662,7 +662,7 @@ const ChatMessage = ({
           className="block sm:hidden"
           title="Delete message"
         >
-          <MinusCircle className="w-5 h-5 text-slate-400 dark:text-slate-600" />
+          <MinusCircle className="w-5 h-5 text-slate-400 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-400" />
         </button>
       </div>
       <span className="flex-1 w-full sm:w-auto h-full min-h-fit overflow-x-auto p-1">
@@ -900,7 +900,7 @@ const ChatMessage = ({
         </div>
       </span>
       <button onClick={deleteMessage} className="w-4 hidden sm:block">
-        <MinusCircle className="w-4 h-4 text-transparent group-hover:text-slate-600 dark:group-hover:text-slate-400" />
+        <MinusCircle className="w-4 h-4 text-transparent group-hover:text-slate-600 dark:group-hover:text-slate-400 hover:group-hover:text-slate-800 dark:hover:group-hover:text-slate-200" />
       </button>
     </div>
   );
@@ -1009,7 +1009,7 @@ const SettingsDialog = ({
             </div>
           </div>
           <button
-            className="p-2 px-4 w-full sm:w-auto rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+            className="px-4 py-2 w-full sm:w-auto rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white focus:outline-none"
             onClick={() => {
               apiKey.save();
               baseURL.save();
@@ -1327,7 +1327,7 @@ const SamplingSettings = ({
       </div>
       <div className="flex gap-2">
         <button
-          className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-800 dark:disabled:text-slate-400 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+          className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-800 dark:disabled:text-slate-400 bg-emerald-600 dark:bg-emerald-500 text-white font-bold hover:bg-emerald-700 dark:hover:bg-emerald-400 focus:outline-none"
           onClick={() => {
             save();
           }}
@@ -1692,7 +1692,7 @@ const SamplingSettingsDialog = ({
           </div>
           <div>
             <button
-              className="p-2 px-4 w-full sm:w-auto rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+              className="px-4 py-2 w-full sm:w-auto rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white focus:outline-none"
               onClick={() => {
                 save();
                 setSettingsOpen(false);
@@ -1923,7 +1923,7 @@ const ToolSettings = ({
         </div>
         <div className="flex gap-2">
           <button
-            className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-800 dark:disabled:text-slate-400 bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+            className="p-2 px-4 w-full sm:w-auto rounded-lg disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-800 dark:disabled:text-slate-400 bg-emerald-600 text-white font-bold hover:bg-emerald-700 dark:hover:bg-emerald-500 focus:outline-none"
             onClick={() => {
               saveToolSettings();
             }}
@@ -2175,7 +2175,7 @@ const ToolSettingsDialog = ({
           </div>
           <div>
             <button
-              className="p-2 px-4 w-full sm:w-auto rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-700 focus:outline-none"
+              className="px-4 py-2 w-full sm:w-auto rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white focus:outline-none"
               onClick={() => {
                 saveToolSettings();
               }}
@@ -2765,7 +2765,7 @@ export default function Home() {
                 <button
                   title="Submit message (CTRL+Enter)"
                   onClick={sendMessage}
-                  className="px-4 py-2 w-full sm:w-auto rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 text-white focus:outline-none"
+                  className="px-4 py-2 w-full sm:w-auto rounded-lg font-bold bg-emerald-600 hover:bg-emerald-700 dark:hover:bg-emerald-500 text-white focus:outline-none"
                 >
                   Submit
                 </button>
