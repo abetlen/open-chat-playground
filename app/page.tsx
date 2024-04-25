@@ -1989,6 +1989,7 @@ const ToolSettingsDialog = ({
       parameters: JSON.stringify(tool.function.parameters, null, 2) ?? "",
     }))
   );
+  const { theme } = useTheme();
   const saveToolSettings = () => {
     const tools_parsed = currentTools.map((tool) => ({
       type: "function" as const,
@@ -2139,6 +2140,7 @@ const ToolSettingsDialog = ({
                             extensions={[json()]}
                             value={tool.parameters}
                             placeholder="Tool parameters (OpenAPI JSON)"
+                            theme={theme === "dark" ? "dark" : "light"}
                             onChange={(value) => {
                               setCurrentTools(
                                 currentTools.map((t, i) =>
