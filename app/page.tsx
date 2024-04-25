@@ -124,7 +124,9 @@ async function copyToClipboard(textToCopy: string) {
   }
 }
 
-const reactMarkdownComponents = (theme) => ({
+const reactMarkdownComponents = (
+  theme: { [key: string]: React.CSSProperties }
+) => ({
   h1: (props: any) => {
     const { children, ...rest } = props;
     return <h1 className="text-2xl font-bold">{children}</h1>;
