@@ -562,7 +562,7 @@ const ImageEdit = ({
             </button>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={url} alt="" />
+          <img src={url} alt="" className="max-h-[35rem]"/>
         </div>
       ) : (
         <div className="flex items-center">
