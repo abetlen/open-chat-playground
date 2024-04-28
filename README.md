@@ -6,7 +6,7 @@
 
 # Open Chat Playground
 
-[![Desktop](./public/screenshots/desktop.png)](https://abetlen.github.io/open-chat-playground)
+[![Desktop](./public/screenshots/desktop-dark.png)](https://abetlen.github.io/open-chat-playground)
 
 Open Chat Playground is a single page application for experimenting with OpenAI `/v1/chat/completion` compatible web servers.
 
