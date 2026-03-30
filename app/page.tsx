@@ -152,7 +152,7 @@ const reactMarkdownComponents = (theme: {
   },
   li: (props: any) => {
     const { children, ...rest } = props;
-    return <li>{children}</li>;
+    return <li className="[&>p]:inline">{children}</li>;
   },
   // links
   a: (props: any) => {
