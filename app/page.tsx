@@ -71,6 +71,7 @@ const createChatCompletion = (
   const stop = settings.stop;
   const jsonMode = settings.jsonMode;
   const stream = settings.stream;
+  const reasoningEffort = settings.reasoningEffort;
   const openai = new OpenAI({
     baseURL: baseURL === "" ? undefined : baseURL,
     apiKey: apiKey,
@@ -91,6 +92,7 @@ const createChatCompletion = (
       presence_penalty: presencePenalty,
       stream,
       response_format: jsonMode ? { type: "json_object" } : undefined,
+      ...(reasoningEffort ? { reasoning_effort: reasoningEffort } : {}),
     },
     {
       signal,
@@ -220,6 +222,7 @@ type Settings = {
   stop: string[];
   jsonMode: boolean;
   stream: boolean;
+  reasoningEffort: string | null;
 };
 
 const INITIAL_SETTINGS: Settings = {
@@ -233,6 +236,7 @@ const INITIAL_SETTINGS: Settings = {
   stop: [],
   jsonMode: false,
   stream: true,
+  reasoningEffort: null,
 };
 
 const INITIAL_TOOLS: ChatCompletionTool[] = [
@@ -1057,6 +1061,8 @@ const SamplingSettings = ({
   const stopId = useId();
   const [stream, setStream] = useState(settings.stream);
   const streamId = useId();
+  const [reasoningEffort, setReasoningEffort] = useState(settings.reasoningEffort);
+  const reasoningEffortId = useId();
 
   const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -1072,6 +1078,7 @@ const SamplingSettings = ({
       jsonMode,
       stop,
       stream,
+      reasoningEffort,
     };
     setSettings(newSettings);
   };
@@ -1087,6 +1094,7 @@ const SamplingSettings = ({
     setJsonMode(settings.jsonMode);
     setStop(settings.stop);
     setStream(settings.stream);
+    setReasoningEffort(settings.reasoningEffort);
   };
 
   return (
@@ -1324,6 +1332,29 @@ const SamplingSettings = ({
             </label>
           </div>
         </div>
+        {/* Reasoning Effort */}
+        <div className="w-full flex flex-col gap-2">
+          <label
+            htmlFor={reasoningEffortId}
+            className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+          >
+            Reasoning Effort
+          </label>
+          <select
+            id={reasoningEffortId}
+            value={reasoningEffort ?? ""}
+            onChange={(e) => setReasoningEffort(e.target.value || null)}
+            className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
+          >
+            <option value="">Default</option>
+            <option value="none">none</option>
+            <option value="minimal">minimal</option>
+            <option value="low">low</option>
+            <option value="medium">medium</option>
+            <option value="high">high</option>
+            <option value="xhigh">xhigh</option>
+          </select>
+        </div>
       </div>
       <div className="flex gap-2">
         <button
@@ -1345,7 +1376,8 @@ const SamplingSettings = ({
             stop.every(
               (stopSequence, index) => stopSequence === settings.stop[index]
             ) &&
-            stream === settings.stream
+            stream === settings.stream &&
+            reasoningEffort === settings.reasoningEffort
           }
         >
           Save
@@ -1368,7 +1400,8 @@ const SamplingSettings = ({
             stop.every(
               (stopSequence, index) => stopSequence === settings.stop[index]
             ) &&
-            stream === settings.stream
+            stream === settings.stream &&
+            reasoningEffort === settings.reasoningEffort
           }
         >
           Reset
@@ -1416,6 +1449,8 @@ const SamplingSettingsDialog = ({
   const stopId = useId();
   const [stream, setStream] = useState(settings.stream);
   const streamId = useId();
+  const [reasoningEffort, setReasoningEffort] = useState(settings.reasoningEffort);
+  const reasoningEffortId = useId();
 
   const saveSettingsButtonRef = useRef<HTMLButtonElement | null>(null);
 
@@ -1431,6 +1466,7 @@ const SamplingSettingsDialog = ({
       jsonMode,
       stop,
       stream,
+      reasoningEffort,
     };
     setSettings(newSettings);
   };
@@ -1688,6 +1724,29 @@ const SamplingSettingsDialog = ({
                   Enabled
                 </label>
               </div>
+            </div>
+            {/* Reasoning Effort */}
+            <div className="w-full flex flex-col gap-2">
+              <label
+                htmlFor={reasoningEffortId}
+                className="text-slate-800 dark:text-slate-400 text-sm font-bold"
+              >
+                Reasoning Effort
+              </label>
+              <select
+                id={reasoningEffortId}
+                value={reasoningEffort ?? ""}
+                onChange={(e) => setReasoningEffort(e.target.value || null)}
+                className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
+              >
+                <option value="">Default</option>
+                <option value="none">none</option>
+                <option value="minimal">minimal</option>
+                <option value="low">low</option>
+                <option value="medium">medium</option>
+                <option value="high">high</option>
+                <option value="xhigh">xhigh</option>
+              </select>
             </div>
           </div>
           <div>
