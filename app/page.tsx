@@ -1340,20 +1340,14 @@ const SamplingSettings = ({
           >
             Reasoning Effort
           </label>
-          <select
+          <input
             id={reasoningEffortId}
+            type="text"
             value={reasoningEffort ?? ""}
             onChange={(e) => setReasoningEffort(e.target.value || null)}
             className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
-          >
-            <option value="">Default</option>
-            <option value="none">none</option>
-            <option value="minimal">minimal</option>
-            <option value="low">low</option>
-            <option value="medium">medium</option>
-            <option value="high">high</option>
-            <option value="xhigh">xhigh</option>
-          </select>
+            placeholder="e.g. low, medium, high"
+          />
         </div>
       </div>
       <div className="flex gap-2">
@@ -1733,20 +1727,14 @@ const SamplingSettingsDialog = ({
               >
                 Reasoning Effort
               </label>
-              <select
+              <input
                 id={reasoningEffortId}
+                type="text"
                 value={reasoningEffort ?? ""}
                 onChange={(e) => setReasoningEffort(e.target.value || null)}
                 className="w-full p-1 sm:p-2 focus:ring-emerald-600 focus:ring-1 sm:focus:ring-2 rounded-lg border border-slate-200 focus:border-slate-200 dark:border-slate-700 dark:focus:border-slate-700 dark:bg-slate-900"
-              >
-                <option value="">Default</option>
-                <option value="none">none</option>
-                <option value="minimal">minimal</option>
-                <option value="low">low</option>
-                <option value="medium">medium</option>
-                <option value="high">high</option>
-                <option value="xhigh">xhigh</option>
-              </select>
+                placeholder="e.g. low, medium, high"
+              />
             </div>
           </div>
           <div>
