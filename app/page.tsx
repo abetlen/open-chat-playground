@@ -142,12 +142,12 @@ const reactMarkdownComponents = (theme: {
   // list
   ul: (props: any) => {
     const { children, ...rest } = props;
-    return <ul className="list-disc pl-8">{children}</ul>;
+    return <ul className="list-disc pl-8 whitespace-normal">{children}</ul>;
   },
   ol: (props: any) => {
     const { children, ...rest } = props;
     return (
-      <ol className="list-decimal pl-8">{children}</ol>
+      <ol className="list-decimal pl-8 whitespace-normal">{children}</ol>
     );
   },
   li: (props: any) => {
