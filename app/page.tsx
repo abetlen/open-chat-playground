@@ -42,7 +42,6 @@ import { json } from "@codemirror/lang-json";
 import OpenAI from "openai";
 import {
   ChatCompletionRole,
-  ChatCompletionMessage,
   ChatCompletionMessageParam,
   ChatCompletionTool,
   ChatCompletionToolChoiceOption,
@@ -53,8 +52,41 @@ import React from "react";
 import { Stream } from "openai/streaming.mjs";
 import { useTheme } from "next-themes";
 
+type AssistantTextContentBlock = {
+  type: "text";
+  text: string;
+};
+
+type AssistantThinkingContentBlock = {
+  type: "thinking";
+  thinking: string;
+  signature?: string;
+};
+
+type AssistantRefusalContentBlock = {
+  type: "refusal";
+  refusal: string;
+};
+
+type AssistantContentBlock =
+  | AssistantTextContentBlock
+  | AssistantThinkingContentBlock
+  | AssistantRefusalContentBlock;
+
+type PlaygroundAssistantMessage = Omit<
+  Extract<ChatCompletionMessageParam, { role: "assistant" }>,
+  "content"
+> & {
+  role: "assistant";
+  content?: string | AssistantContentBlock[] | null;
+};
+
+type PlaygroundMessage =
+  | Exclude<ChatCompletionMessageParam, { role: "assistant" }>
+  | PlaygroundAssistantMessage;
+
 const createChatCompletion = (
-  messages: ChatCompletionMessageParam[],
+  messages: PlaygroundMessage[],
   settings: Settings,
   tools: ChatCompletionTool[],
   toolChoice: ChatCompletionToolChoiceOption,
@@ -79,7 +111,7 @@ const createChatCompletion = (
   });
   return openai.chat.completions.create(
     {
-      messages,
+      messages: serializeMessagesForChatCompletion(messages),
       tools: tools.length > 0 ? tools : undefined,
       tool_choice:
         toolChoice !== "auto" && tools.length > 0 ? toolChoice : undefined,
@@ -259,7 +291,7 @@ const INITIAL_TOOLS: ChatCompletionTool[] = [
 
 const INITIAL_TOOL_CHOICE: ChatCompletionToolChoiceOption = "auto";
 
-const INITIAL_MESSAGES: ChatCompletionMessageParam[] = [
+const INITIAL_MESSAGES: PlaygroundMessage[] = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "" },
   // { role: "user", content: "What is the capital of France?" },
@@ -343,6 +375,388 @@ const INITIAL_MESSAGES: ChatCompletionMessageParam[] = [
   //   },
   // },
 ];
+
+const isRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
+const getFirstString = (...values: unknown[]) => {
+  for (const value of values) {
+    if (typeof value === "string") {
+      return value;
+    }
+  }
+  return null;
+};
+
+const collapseAssistantContent = (
+  content: PlaygroundAssistantMessage["content"]
+): PlaygroundAssistantMessage["content"] => {
+  if (!Array.isArray(content)) {
+    return content;
+  }
+
+  if (content.length === 0) {
+    return undefined;
+  }
+
+  const textBlocks = content.filter(
+    (block): block is AssistantTextContentBlock => block.type === "text"
+  );
+
+  if (textBlocks.length === content.length) {
+    return textBlocks.map((block) => block.text).join("");
+  }
+
+  return content;
+};
+
+const appendAssistantContentBlock = (
+  content: PlaygroundAssistantMessage["content"],
+  block: AssistantContentBlock
+): PlaygroundAssistantMessage["content"] => {
+  if (block.type === "text" && block.text.length === 0) {
+    return content ?? "";
+  }
+
+  if (block.type === "thinking" && block.thinking.length === 0) {
+    return content;
+  }
+
+  if (block.type === "refusal" && block.refusal.length === 0) {
+    return content;
+  }
+
+  if (content === undefined || content === null || content === "") {
+    return block.type === "text" ? block.text : [block];
+  }
+
+  if (typeof content === "string") {
+    if (block.type === "text") {
+      return content + block.text;
+    }
+
+    return collapseAssistantContent([{ type: "text", text: content }, block]);
+  }
+
+  const blocks = [...content];
+  const lastBlock = blocks[blocks.length - 1];
+
+  if (block.type === "text" && lastBlock?.type === "text") {
+    blocks[blocks.length - 1] = {
+      ...lastBlock,
+      text: lastBlock.text + block.text,
+    };
+    return collapseAssistantContent(blocks);
+  }
+
+  if (
+    block.type === "thinking" &&
+    lastBlock?.type === "thinking" &&
+    lastBlock.signature === block.signature
+  ) {
+    blocks[blocks.length - 1] = {
+      ...lastBlock,
+      thinking: lastBlock.thinking + block.thinking,
+      ...(block.signature ? { signature: block.signature } : {}),
+    };
+    return blocks;
+  }
+
+  if (block.type === "refusal" && lastBlock?.type === "refusal") {
+    blocks[blocks.length - 1] = {
+      ...lastBlock,
+      refusal: lastBlock.refusal + block.refusal,
+    };
+    return blocks;
+  }
+
+  blocks.push(block);
+  return collapseAssistantContent(blocks);
+};
+
+const normalizeThinkingEntries = (
+  value: unknown
+): Array<{ thinking: string; signature?: string }> => {
+  if (typeof value === "string") {
+    return [{ thinking: value }];
+  }
+
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => normalizeThinkingEntries(item));
+  }
+
+  if (!isRecord(value)) {
+    return [];
+  }
+
+  const directThinking = getFirstString(
+    value.thinking,
+    value.text,
+    value.content,
+    value.reasoning
+  );
+  if (directThinking !== null) {
+    return [
+      {
+        thinking: directThinking,
+        ...(typeof value.signature === "string"
+          ? { signature: value.signature }
+          : {}),
+      },
+    ];
+  }
+
+  return [
+    ...normalizeThinkingEntries(value.summary),
+    ...normalizeThinkingEntries(value.content),
+  ];
+};
+
+const normalizeAssistantContentBlock = (
+  value: unknown
+): AssistantContentBlock | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (value.type === "text" && typeof value.text === "string") {
+    return { type: "text", text: value.text };
+  }
+
+  if (value.type === "refusal" && typeof value.refusal === "string") {
+    return { type: "refusal", refusal: value.refusal };
+  }
+
+  if (value.type === "thinking") {
+    const thinking = getFirstString(value.thinking, value.text, value.content);
+    if (thinking !== null) {
+      return {
+        type: "thinking",
+        thinking,
+        ...(typeof value.signature === "string"
+          ? { signature: value.signature }
+          : {}),
+      };
+    }
+  }
+
+  return null;
+};
+
+const normalizeAssistantContent = (
+  value: unknown
+): PlaygroundAssistantMessage["content"] => {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (value === null || value === undefined) {
+    return value;
+  }
+
+  const rawParts = Array.isArray(value) ? value : [value];
+  const blocks: AssistantContentBlock[] = [];
+
+  for (const rawPart of rawParts) {
+    const normalizedBlock = normalizeAssistantContentBlock(rawPart);
+    if (normalizedBlock) {
+      blocks.push(normalizedBlock);
+      continue;
+    }
+
+    for (const thinkingEntry of normalizeThinkingEntries(rawPart)) {
+      blocks.push({
+        type: "thinking",
+        thinking: thinkingEntry.thinking,
+        ...(thinkingEntry.signature
+          ? { signature: thinkingEntry.signature }
+          : {}),
+      });
+    }
+  }
+
+  return collapseAssistantContent(blocks.length > 0 ? blocks : undefined);
+};
+
+const mergeAssistantContent = (
+  content: PlaygroundAssistantMessage["content"],
+  nextContent: PlaygroundAssistantMessage["content"]
+): PlaygroundAssistantMessage["content"] => {
+  if (nextContent === undefined) {
+    return content;
+  }
+
+  if (nextContent === null) {
+    return content ?? null;
+  }
+
+  if (typeof nextContent === "string") {
+    return appendAssistantContentBlock(content, {
+      type: "text",
+      text: nextContent,
+    });
+  }
+
+  return nextContent.reduce(
+    (currentContent, block) =>
+      appendAssistantContentBlock(currentContent, block),
+    content
+  );
+};
+
+const appendThinkingToAssistantContent = (
+  content: PlaygroundAssistantMessage["content"],
+  value: unknown
+) => {
+  return normalizeThinkingEntries(value).reduce(
+    (currentContent, entry) =>
+      appendAssistantContentBlock(currentContent, {
+        type: "thinking",
+        thinking: entry.thinking,
+        ...(entry.signature ? { signature: entry.signature } : {}),
+      }),
+    content
+  );
+};
+
+const normalizeAssistantMessage = (value: unknown): PlaygroundAssistantMessage => {
+  const message = isRecord(value) ? value : {};
+  const {
+    content: rawContent,
+    refusal,
+    thinking,
+    reasoning,
+    reasoning_content,
+    summary,
+    role: _role,
+    ...rest
+  } = message;
+
+  let content: PlaygroundAssistantMessage["content"] = undefined;
+  content = appendThinkingToAssistantContent(content, thinking);
+  content = appendThinkingToAssistantContent(content, reasoning);
+  content = appendThinkingToAssistantContent(content, reasoning_content);
+  content = appendThinkingToAssistantContent(content, summary);
+  content = mergeAssistantContent(content, normalizeAssistantContent(rawContent));
+
+  if (typeof refusal === "string") {
+    content = appendAssistantContentBlock(content, {
+      type: "refusal",
+      refusal,
+    });
+  }
+
+  const normalizedMessage: PlaygroundAssistantMessage = {
+    ...(rest as Omit<PlaygroundAssistantMessage, "role" | "content">),
+    role: "assistant",
+  };
+
+  if (content !== undefined) {
+    normalizedMessage.content = content;
+  } else if (rawContent === null) {
+    normalizedMessage.content = null;
+  }
+
+  return normalizedMessage;
+};
+
+const normalizePlaygroundMessages = (value: unknown): PlaygroundMessage[] => {
+  if (!Array.isArray(value)) {
+    return INITIAL_MESSAGES;
+  }
+
+  const messages = value.flatMap((message) => {
+    if (!isRecord(message) || typeof message.role !== "string") {
+      return [];
+    }
+
+    if (message.role === "assistant") {
+      return [normalizeAssistantMessage(message)];
+    }
+
+    return [message as PlaygroundMessage];
+  });
+
+  return messages.length > 0 ? messages : INITIAL_MESSAGES;
+};
+
+const serializeAssistantContent = (
+  content: PlaygroundAssistantMessage["content"]
+) => {
+  if (typeof content === "string" || content === null || content === undefined) {
+    return content;
+  }
+
+  return content
+    .flatMap((block) => {
+      if (block.type === "text") {
+        return [block.text];
+      }
+
+      if (block.type === "refusal") {
+        return [block.refusal];
+      }
+
+      return [];
+    })
+    .join("\n\n");
+};
+
+const serializeMessagesForChatCompletion = (
+  messages: PlaygroundMessage[]
+): ChatCompletionMessageParam[] => {
+  return messages.map((message) => {
+    if (message.role !== "assistant") {
+      return message as ChatCompletionMessageParam;
+    }
+
+    return {
+      ...message,
+      content: serializeAssistantContent(message.content),
+    } as ChatCompletionMessageParam;
+  });
+};
+
+const appendAssistantDelta = (
+  message: PlaygroundAssistantMessage,
+  delta: Record<string, unknown>
+): PlaygroundAssistantMessage => {
+  let content = message.content;
+  content = appendThinkingToAssistantContent(content, delta.thinking);
+  content = appendThinkingToAssistantContent(content, delta.reasoning);
+  content = appendThinkingToAssistantContent(content, delta.reasoning_content);
+  content = appendThinkingToAssistantContent(content, delta.summary);
+  content = mergeAssistantContent(content, normalizeAssistantContent(delta.content));
+
+  if (typeof delta.refusal === "string") {
+    content = appendAssistantContentBlock(content, {
+      type: "refusal",
+      refusal: delta.refusal,
+    });
+  }
+
+  if (content === message.content) {
+    return message;
+  }
+
+  return {
+    ...message,
+    content,
+  };
+};
+
+const assistantHasTextContent = (
+  content: PlaygroundAssistantMessage["content"]
+) => {
+  if (typeof content === "string") {
+    return true;
+  }
+
+  return Array.isArray(content)
+    ? content.some((block) => block.type === "text")
+    : false;
+};
 
 const ROLES: ChatCompletionRole[] = ["system", "user", "assistant"];
 
@@ -507,6 +921,62 @@ const ContentArea = ({
   );
 };
 
+const AssistantThinkingBlockView = ({
+  block,
+}: {
+  block: AssistantThinkingContentBlock;
+}) => {
+  const { theme } = useTheme();
+
+  return (
+    <div className="rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2 dark:border-amber-900/60 dark:bg-amber-950/20">
+      <div className="pb-1 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400">
+        Thinking
+      </div>
+      <Markdown
+        remarkPlugins={[remarkGfm, remarkMath]}
+        rehypePlugins={[rehypeKatex]}
+        components={reactMarkdownComponents(theme === "dark" ? dark : light)}
+        className="whitespace-pre-wrap overflow-x-auto flex flex-col gap-2 text-sm text-amber-950 dark:text-amber-100"
+      >
+        {block.thinking}
+      </Markdown>
+    </div>
+  );
+};
+
+const AssistantContentBlockView = ({
+  role,
+  block,
+  onChange,
+}: {
+  role: ChatCompletionRole;
+  block: AssistantContentBlock;
+  onChange: (value: AssistantContentBlock) => void;
+}) => {
+  if (block.type === "text") {
+    return (
+      <ContentArea
+        role={role}
+        value={block.text}
+        onChange={(value) => onChange({ ...block, text: value })}
+      />
+    );
+  }
+
+  if (block.type === "refusal") {
+    return (
+      <ContentArea
+        role={role}
+        value={block.refusal}
+        onChange={(value) => onChange({ ...block, refusal: value })}
+      />
+    );
+  }
+
+  return <AssistantThinkingBlockView block={block} />;
+};
+
 const ImageEdit = ({
   url,
   setUrl,
@@ -637,8 +1107,8 @@ const ChatMessage = ({
   setMessage,
   deleteMessage,
 }: {
-  message: ChatCompletionMessageParam;
-  setMessage: (message: ChatCompletionMessageParam) => void;
+  message: PlaygroundMessage;
+  setMessage: (message: PlaygroundMessage) => void;
   deleteMessage: () => void;
 }) => {
   const rootRef = useRef<HTMLDivElement | null>(null);
@@ -683,6 +1153,30 @@ const ChatMessage = ({
               autoFocus={message.role === "user" && message.content === ""}
             />
           )}
+
+          {message.role === "assistant" &&
+            Array.isArray(message.content) && (
+              <ul className="flex flex-col w-full gap-3">
+                {message.content.map((block, index) => (
+                  <li key={index}>
+                    <AssistantContentBlockView
+                      role={message.role}
+                      block={block}
+                      onChange={(value) => {
+                        if (!Array.isArray(message.content)) return;
+                        const nextContent = message.content.map((item, idx) =>
+                          idx === index ? value : item
+                        );
+                        setMessage({
+                          ...message,
+                          content: collapseAssistantContent(nextContent),
+                        });
+                      }}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
 
           {/* tools */}
           {message.role === "assistant" &&
@@ -771,16 +1265,18 @@ const ChatMessage = ({
             )}
           {message.role === "assistant" && (
             <div className="py-1 flex">
-              {!message.content && message.content !== "" && (
+              {!assistantHasTextContent(message.content) && (
                 <button
                   title="Add text content"
                   className="p-2 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600 flex items-center justify-center font-bold text-slate-400 dark:text-slate-600 sm:text-transparent dark:sm:text-transparent group-hover:text-slate-800 dark:group-hover:text-slate-400"
                   onClick={() => {
-                    const newMessage = {
+                    setMessage({
                       ...message,
-                      content: "",
-                    };
-                    setMessage(newMessage);
+                      content: appendAssistantContentBlock(message.content, {
+                        type: "text",
+                        text: "",
+                      }),
+                    });
                   }}
                 >
                   <Type className="w-5 h-5" />
@@ -2242,7 +2738,7 @@ const getCopyUrl = ({
   toolChoice,
   settings,
 }: {
-  messages: ChatCompletionMessageParam[];
+  messages: PlaygroundMessage[];
   tools: ChatCompletionTool[];
   toolChoice: ChatCompletionToolChoiceOption;
   settings: Settings;
@@ -2343,7 +2839,9 @@ const getInitialMessagesFromParams = (params: URLSearchParams) => {
   let initialMessages = INITIAL_MESSAGES;
   if (initialMessagesParam) {
     try {
-      initialMessages = JSON.parse(initialMessagesParam);
+      initialMessages = normalizePlaygroundMessages(
+        JSON.parse(initialMessagesParam)
+      );
     } catch (error) {
       console.error("Error parsing initialMessages query parameter:", error);
     }
@@ -2395,7 +2893,7 @@ const getInitialSettingsFromParams = (params: URLSearchParams) => {
 
 export default function Home() {
   const queryParams = useSearchParams();
-  const [messages, setMessages] = useState(
+  const [messages, setMessages] = useState<PlaygroundMessage[]>(
     getInitialMessagesFromParams(queryParams)
   );
   const [tools, setTools] = useState<ChatCompletionTool[]>(
@@ -2453,19 +2951,19 @@ export default function Home() {
       .then(async (responseStream) => {
         if (!settings.stream) {
           const response = responseStream as ChatCompletion;
-          const content = response.choices[0].message.content;
-          if (content) {
-            setMessages((messages) => [
-              ...messages.slice(0, -1),
-              { role: "assistant", content },
-            ]);
-          }
+          const assistantMessage = normalizeAssistantMessage(
+            response.choices[0].message as unknown
+          );
+          setMessages((messages) => [
+            ...messages.slice(0, -1),
+            assistantMessage,
+          ]);
           const toolCalls = response.choices[0].message.tool_calls;
           if (toolCalls) {
             setMessages((messages) => {
               const lastMessage = messages[
                 messages.length - 1
-              ] as ChatCompletionMessage;
+              ] as PlaygroundAssistantMessage;
               let lastMessageToolCalls =
                 lastMessage.tool_calls === undefined
                   ? []
@@ -2517,24 +3015,25 @@ export default function Home() {
                 latestTokenTime: now,
                 nTokens: metrics.nTokens ? metrics.nTokens + 1 : 1,
               };
-            }
-            return null;
-          });
-          const content = message.choices[0].delta.content;
-          if (content) {
+              }
+              return null;
+            });
+          const delta = message.choices[0].delta as Record<string, unknown>;
+          if (
+            delta.content !== undefined ||
+            delta.refusal !== undefined ||
+            delta.thinking !== undefined ||
+            delta.reasoning !== undefined ||
+            delta.reasoning_content !== undefined ||
+            delta.summary !== undefined
+          ) {
             setMessages((messages) => {
               const lastMessage = messages[
                 messages.length - 1
-              ] as ChatCompletionMessage;
-              const lastMessageContent = lastMessage.content;
+              ] as PlaygroundAssistantMessage;
               return [
                 ...messages.slice(0, -1),
-                {
-                  role: "assistant",
-                  content: lastMessageContent
-                    ? lastMessageContent + content
-                    : content,
-                },
+                appendAssistantDelta(lastMessage, delta),
               ];
             });
           }
@@ -2543,7 +3042,7 @@ export default function Home() {
             setMessages((messages) => {
               let lastMessage = messages[
                 messages.length - 1
-              ] as ChatCompletionMessage;
+              ] as PlaygroundAssistantMessage;
               let lastMessageToolCalls =
                 lastMessage.tool_calls === undefined
                   ? []
